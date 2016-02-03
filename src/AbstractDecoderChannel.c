@@ -39,7 +39,7 @@
 #include "BitInputStream.h"
 #include "EXITypes.h"
 #include "MethodsBag.h"
-/*#include "exiForJsonEXICoder.h"*/
+/*#include "EXIforJSONEXICoder.h"*/
 #include "ErrorCodes.h"
 
 #include "StringValueTable.h"
@@ -466,7 +466,7 @@ int decodeStringValue(bitstream_t* stream, exi_value_table_t* stringTable, uint1
 					 * value string table partition */
 #if EXI_OPTION_VALUE_MAX_LENGTH < 0
 				errn = exiAddStringValue(stringTable, &(s->miss), qnameID);
-# else /* EXI_exiForJsonVALUE_MAX_LENGTH < 0  */
+# else /* EXI_EXIforJSONVALUE_MAX_LENGTH < 0  */
 					if (L <= EXI_OPTION_VALUE_MAX_LENGTH) {
 						errn = exiAddStringValue(stringTable, &(s->miss), qnameID);
 					}

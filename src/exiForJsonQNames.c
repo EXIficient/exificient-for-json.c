@@ -32,15 +32,15 @@
 
 
 
-#ifndef EXI_exiForJson_QNAMES_C
-#define EXI_exiForJson_QNAMES_C
+#ifndef EXI_EXIforJSON_QNAMES_C
+#define EXI_EXIforJSON_QNAMES_C
 
 #include "EXITypes.h"
 #include "ErrorCodes.h"
-#include "exiForJsonQNameDefines.h"
+#include "EXIforJSONQNameDefines.h"
 
 /* qname is a composition of namespaceURI(ID) and localPart(ID) */
-static exi_eqname_t qnames[EXI_exiForJsonMAX_NUMBER_OF_QNAMES] = {
+static exi_eqname_t qnames[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES] = {
 	/* qnameID == 0: key */
 	{0, 0},
 	/* qnameID == 1: {http://www.w3.org/XML/1998/namespace}base */
@@ -191,9 +191,9 @@ static exi_eqname_t qnames[EXI_exiForJsonMAX_NUMBER_OF_QNAMES] = {
 };
 
 
-int exiexiForJsonGetEQName(exi_state_t* state, uint16_t qnameID, uint16_t* namespaceURI, uint16_t* localPart) {
+int exiEXIforJSONGetEQName(exi_state_t* state, uint16_t qnameID, uint16_t* namespaceURI, uint16_t* localPart) {
 	int errn = 0;
-	/* EXI_exiForJsonNUMBER_OF_QNAMES */
+	/* EXI_EXIforJSONNUMBER_OF_QNAMES */
 	if (qnameID < state->nextQNameID) {
 		*namespaceURI = qnames[qnameID].namespaceURI;
 		*localPart = qnames[qnameID].localPart;
@@ -204,11 +204,11 @@ int exiexiForJsonGetEQName(exi_state_t* state, uint16_t qnameID, uint16_t* names
 }
 
 
-int exiexiForJsonGetQNameID(exi_state_t* state, uint16_t namespaceURI, uint16_t localPart, uint16_t* qnameID) {
+int exiEXIforJSONGetQNameID(exi_state_t* state, uint16_t namespaceURI, uint16_t localPart, uint16_t* qnameID) {
 	uint16_t i;
 	int errn = EXI_ERROR_OUT_OF_BOUNDS;
 	/* TODO Do something more efficient than just walk over the entire list */
-	/* EXI_exiForJsonNUMBER_OF_QNAMES */
+	/* EXI_EXIforJSONNUMBER_OF_QNAMES */
 	for(i=0; i<state->nextQNameID && errn != 0; i++) {
 		if(qnames[i].localPart == localPart && qnames[i].namespaceURI == namespaceURI) {
 			*qnameID = i;
@@ -220,9 +220,9 @@ int exiexiForJsonGetQNameID(exi_state_t* state, uint16_t namespaceURI, uint16_t 
 }
 
 
-int exiexiForJsonAddEQName(exi_state_t* state, uint16_t* qnameID, uint16_t namespaceURI, uint16_t localPart) {
+int exiEXIforJSONAddEQName(exi_state_t* state, uint16_t* qnameID, uint16_t namespaceURI, uint16_t localPart) {
 	int errn = 0;
-	if(state->nextQNameID < (EXI_exiForJsonMAX_NUMBER_OF_QNAMES -1)) {
+	if(state->nextQNameID < (EXI_EXIforJSONMAX_NUMBER_OF_QNAMES -1)) {
 		/* store IDs */
 		qnames[state->nextQNameID].namespaceURI = namespaceURI;
 		qnames[state->nextQNameID].localPart = localPart;

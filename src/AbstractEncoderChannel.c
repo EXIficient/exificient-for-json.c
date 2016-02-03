@@ -38,7 +38,7 @@
 #include "EXITypes.h"
 #include "ErrorCodes.h"
 #include "MethodsBag.h"
-/*#include "exiForJsonEXICoder.h"*/
+/*#include "EXIforJSONEXICoder.h"*/
 
 #include "StringValueTable.h"
 

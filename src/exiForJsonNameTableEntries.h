@@ -32,15 +32,15 @@
 
 
 
-#ifndef EXI_exiForJson_NAME_TABLE_ENTRIES_H
-#define EXI_exiForJson_NAME_TABLE_ENTRIES_H
+#ifndef EXI_EXIforJSON_NAME_TABLE_ENTRIES_H
+#define EXI_EXIforJSON_NAME_TABLE_ENTRIES_H
 
 #include "EXITypes.h"
 
 /* ==================================== */
 /* String Table Population */
 
-extern exi_name_table_prepopulated_t exiexiForJsonNameTablePrepopulated;
+extern exi_name_table_prepopulated_t exiEXIforJSONNameTablePrepopulated;
 
 #endif
 

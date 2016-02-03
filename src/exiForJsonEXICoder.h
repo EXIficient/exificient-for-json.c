@@ -32,8 +32,8 @@
 
 
 
-#ifndef EXI_exiForJson_CODER_H
-#define EXI_exiForJson_CODER_H
+#ifndef EXI_EXIforJSON_CODER_H
+#define EXI_EXIforJSON_CODER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,26 +49,26 @@ extern "C" {
 /* increments global and local string count */
 /* in case of dynamic memory string is collected */
 /*
-int exi_exiForJson_AddStringValue(exi_state_t* state, exi_string_ucs_t* sv, uint16_t qnameID);
+int exi_EXIforJSON_AddStringValue(exi_state_t* state, exi_string_ucs_t* sv, uint16_t qnameID);
 */
 
-int exi_exiForJson_PushStack(exi_state_t* state, int16_t newState, uint16_t qnameID);
+int exi_EXIforJSON_PushStack(exi_state_t* state, int16_t newState, uint16_t qnameID);
 
-int exi_exiForJson_PopStack(exi_state_t* state);
+int exi_EXIforJSON_PopStack(exi_state_t* state);
 
-int exi_exiForJson_HandleXsiNilTrue(exi_state_t* state);
+int exi_EXIforJSON_HandleXsiNilTrue(exi_state_t* state);
 
-int exi_exiForJson_HandleXsiType(exi_state_t* state, exi_eqname_t* xsiType);
+int exi_EXIforJSON_HandleXsiType(exi_state_t* state, exi_eqname_t* xsiType);
 
-int exi_exiForJson_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qnameID);
+int exi_EXIforJSON_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qnameID);
 
-int exi_exiForJson_LearnAttribute(exi_state_t* state, uint16_t uriID, uint16_t localID);
+int exi_EXIforJSON_LearnAttribute(exi_state_t* state, uint16_t uriID, uint16_t localID);
 
-int exi_exiForJson_LearnEndElement(exi_state_t* state);
+int exi_EXIforJSON_LearnEndElement(exi_state_t* state);
 
-int exi_exiForJson_IsStartContent(int16_t ruleID);
+int exi_EXIforJSON_IsStartContent(int16_t ruleID);
 
-int exi_exiForJson_MoveToElementContentRule(exi_state_t* state);
+int exi_EXIforJSON_MoveToElementContentRule(exi_state_t* state);
 
 #ifdef __cplusplus
 }

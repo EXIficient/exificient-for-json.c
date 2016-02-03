@@ -32,11 +32,11 @@
 
 
 
-#ifndef EXI_exiForJson_DECODER_C
-#define EXI_exiForJson_DECODER_C
+#ifndef EXI_EXIforJSON_DECODER_C
+#define EXI_EXIforJSON_DECODER_C
 
 
-#include "exiForJsonEXIDecoder.h"
+#include "EXIforJSONEXIDecoder.h"
 
 #include "EXIOptions.h"
 #include "EXITypes.h"
@@ -44,15 +44,15 @@
 #include "DecoderChannel.h"
 
 #include "StringNameTable.h"
-#include "exiForJsonNameTableEntries.h"
+#include "EXIforJSONNameTableEntries.h"
 #include "MethodsBag.h"
 
-#include "exiForJsonEXICoder.h"
+#include "EXIforJSONEXICoder.h"
 #include "EXIHeaderDecoder.h"
 #include "ErrorCodes.h"
 
-#include "exiForJsonQNames.h"
-#include "exiForJsonQNameDefines.h"
+#include "EXIforJSONQNames.h"
+#include "EXIforJSONQNameDefines.h"
 
 
 
@@ -145,7 +145,7 @@ static int exiDecodeNext2Event(bitstream_t* stream, exi_state_t* state,
 	default:
 		if (ruleID < 0) {
 			/* built-in element grammar */
-			if ( exi_exiForJson_IsStartContent(ruleID) ) {
+			if ( exi_EXIforJSON_IsStartContent(ruleID) ) {
 				/* TODO generate 2nd level productions */
 
 				/* StartTagContent grammar */
@@ -308,10 +308,10 @@ static int _exiDecodeQName(bitstream_t* stream, exi_state_t* state,
 		errn = _exiDecodeLocalName(stream, state, qname->uri.id, &qname->localName);
 		if (errn == 0) {
 			if (_qname.localName.type == EXI_NAME_ENTRY_TYPE_STRING_AND_ID) {
-				errn = exiexiForJsonAddEQName(state, qnameID, qname->uri.id, qname->localName.id);
+				errn = exiEXIforJSONAddEQName(state, qnameID, qname->uri.id, qname->localName.id);
 			} else {
 				/* IDs known --> retrieve qnameID */
-				errn = exiexiForJsonGetQNameID(state, qname->uri.id, qname->localName.id, qnameID);
+				errn = exiEXIforJSONGetQNameID(state, qname->uri.id, qname->localName.id, qnameID);
 			}
 		}
 	}
@@ -326,17 +326,17 @@ static int _exiDecodeStartElement(exi_state_t* state, uint16_t qnameID,
 	/* move on */
 	state->grammarStack[state->stackIndex] = (int16_t)stackId;
 	/* push element on stack */
-	return (exi_exiForJson_PushStack(state, newState, qnameID));
+	return (exi_EXIforJSON_PushStack(state, newState, qnameID));
 }
 
 
-int exiexiForJsonGetLastQName(exi_qname_t** qname) {
+int exiEXIforJSONGetLastQName(exi_qname_t** qname) {
 	*qname = &_qname;
 	return (0);
 }
 
 
-int exiexiForJsonDecodeListValue(bitstream_t* stream, exi_state_t* state, uint16_t qnameID, exi_value_t* val, exi_list_t lt) {
+int exiEXIforJSONDecodeListValue(bitstream_t* stream, exi_state_t* state, uint16_t qnameID, exi_value_t* val, exi_list_t lt) {
 	uint32_t uint32;
 
 	val->type = lt.type;
@@ -385,7 +385,7 @@ int exiexiForJsonDecodeListValue(bitstream_t* stream, exi_state_t* state, uint16
 
 
 
-int exiexiForJsonInitDecoder(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONInitDecoder(bitstream_t* stream, exi_state_t* state,
 		exi_name_table_runtime_t runtimeTable, exi_value_table_t stringTable) {
 #if EXI_OPTION_VALUE_PARTITION_CAPACITY != 0
 #if EXI_OPTION_VALUE_MAX_LENGTH != 0
@@ -396,10 +396,10 @@ int exiexiForJsonInitDecoder(bitstream_t* stream, exi_state_t* state,
 	state->stackIndex = 0;
 	state->grammarStack[0] = DOCUMENT;
 	/* name table */
-	state->nameTablePrepopulated = exiexiForJsonNameTablePrepopulated;
+	state->nameTablePrepopulated = exiEXIforJSONNameTablePrepopulated;
 	state->nameTableRuntime = runtimeTable;
 	/* next qname ID */
-	state->nextQNameID = EXI_exiForJsonNUMBER_OF_PREPOPULATED_QNAMES;
+	state->nextQNameID = EXI_EXIforJSONNUMBER_OF_PREPOPULATED_QNAMES;
 	/* string table */
 	state->stringTable = stringTable;
 	state->stringTable.numberOfGlobalStrings = 0;
@@ -422,7 +422,7 @@ int exiexiForJsonInitDecoder(bitstream_t* stream, exi_state_t* state,
 	return (readEXIHeader(stream));
 }
 
-int exiexiForJsonDecodeNextEvent(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONDecodeNextEvent(bitstream_t* stream, exi_state_t* state,
 		exi_event_t* nextEvent) {
 	uint16_t codingLength;
 	uint16_t numberOfProductions;
@@ -889,7 +889,7 @@ int exiexiForJsonDecodeNextEvent(bitstream_t* stream, exi_state_t* state,
 #ifndef __GNUC__
 #pragma warning( disable : 4100 ) /* warning unreferenced parameter 'stream' */
 #endif /* __GNUC__ */
-int exiexiForJsonDecodeStartDocument(bitstream_t* stream, exi_state_t* state) {
+int exiEXIforJSONDecodeStartDocument(bitstream_t* stream, exi_state_t* state) {
 	errn = 0;
 	switch(state->grammarStack[state->stackIndex]) {
 	case 0:
@@ -915,7 +915,7 @@ int exiexiForJsonDecodeStartDocument(bitstream_t* stream, exi_state_t* state) {
 #ifndef __GNUC__
 #pragma warning( disable : 4100 ) /* warning unreferenced parameter 'stream' */
 #endif /* __GNUC__ */
-int exiexiForJsonDecodeEndDocument(bitstream_t* stream, exi_state_t* state) {
+int exiEXIforJSONDecodeEndDocument(bitstream_t* stream, exi_state_t* state) {
 	errn = 0;
 	switch(state->grammarStack[state->stackIndex]) {
 	case 43:
@@ -934,7 +934,7 @@ int exiexiForJsonDecodeEndDocument(bitstream_t* stream, exi_state_t* state) {
 #endif /* __GNUC__ */
 
 
-int exiexiForJsonDecodeStartElement(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONDecodeStartElement(bitstream_t* stream, exi_state_t* state,
 		uint16_t* qnameID) {
 	errn = EXI_ERROR_UNEXPECTED_START_ELEMENT;
 
@@ -1442,7 +1442,7 @@ int exiexiForJsonDecodeStartElement(bitstream_t* stream, exi_state_t* state,
 			}
 			if (errn == 0) {
 				/* retrieve global grammar(existing OR runtime) and push it stack */
-				errn = exi_exiForJson_RetrieveAndPushGlobalGrammar(state, *qnameID);
+				errn = exi_EXIforJSON_RetrieveAndPushGlobalGrammar(state, *qnameID);
 			}
 		}
 		break;
@@ -1451,10 +1451,10 @@ int exiexiForJsonDecodeStartElement(bitstream_t* stream, exi_state_t* state,
 				&_qname);
 		if (errn == 0) {
 			/* update current rule --> element content rule (if not already) */
-			errn = exi_exiForJson_MoveToElementContentRule(state);
+			errn = exi_EXIforJSON_MoveToElementContentRule(state);
 			if (errn == 0) {
 				/* retrieve global grammar(existing OR runtime) and push it stack */
-				errn = exi_exiForJson_RetrieveAndPushGlobalGrammar(state, *qnameID);
+				errn = exi_EXIforJSON_RetrieveAndPushGlobalGrammar(state, *qnameID);
 			}
 		}
 		break;
@@ -1470,7 +1470,7 @@ int exiexiForJsonDecodeStartElement(bitstream_t* stream, exi_state_t* state,
 #ifndef __GNUC__
 #pragma warning( disable : 4100 ) /* warning unreferenced parameter 'stream' */
 #endif /* __GNUC__ */
-int exiexiForJsonDecodeEndElement(bitstream_t* stream, exi_state_t* state, uint16_t* qnameID) {
+int exiEXIforJSONDecodeEndElement(bitstream_t* stream, exi_state_t* state, uint16_t* qnameID) {
 	int16_t currentID;
 	errn = 0;
 	switch(currEvent) {
@@ -1480,19 +1480,19 @@ int exiexiForJsonDecodeEndElement(bitstream_t* stream, exi_state_t* state, uint1
 			
 			/* runtime grammars do have IDs smaller than 0 */
 			/* learn EE event */
-			errn = exi_exiForJson_LearnEndElement(state);
+			errn = exi_EXIforJSON_LearnEndElement(state);
 			
 		}
 		if(errn == 0) {
 			/* copy IDs */
 			*qnameID = state->elementStack[state->stackIndex];
-			errn = (exi_exiForJson_PopStack(state));
+			errn = (exi_EXIforJSON_PopStack(state));
 		}
 		break;
 	default:
 		/* copy IDs */
 		*qnameID = state->elementStack[state->stackIndex];
-		errn = (exi_exiForJson_PopStack(state));
+		errn = (exi_EXIforJSON_PopStack(state));
 		break;
 	}
 
@@ -1503,7 +1503,7 @@ int exiexiForJsonDecodeEndElement(bitstream_t* stream, exi_state_t* state, uint1
 #endif /* __GNUC__ */
 
 
-int exiexiForJsonDecodeCharacters(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONDecodeCharacters(bitstream_t* stream, exi_state_t* state,
 		exi_value_t* val) {
 	int16_t moveOnID = 0;
 	errn = EXI_ERROR_UNEXPECTED_CHARACTERS;
@@ -1706,7 +1706,7 @@ int exiexiForJsonDecodeCharacters(bitstream_t* stream, exi_state_t* state,
 			errn = (EXI_UNSUPPORTED_GRAMMAR_LEARNING_CH);
 		} else {
 			/* update current rule --> element content rule (if not already) */
-			errn = exi_exiForJson_MoveToElementContentRule(state);
+			errn = exi_EXIforJSON_MoveToElementContentRule(state);
 			if (errn == 0) {
 				/* read content value as STRING */
 				val->type = EXI_DATATYPE_STRING;
@@ -1723,12 +1723,12 @@ int exiexiForJsonDecodeCharacters(bitstream_t* stream, exi_state_t* state,
 }
 
 
-int exiexiForJsonDecodeAttributeGenericValue(bitstream_t* stream, exi_state_t* state, uint16_t* qnameID, exi_value_t* val) {
+int exiEXIforJSONDecodeAttributeGenericValue(bitstream_t* stream, exi_state_t* state, uint16_t* qnameID, exi_value_t* val) {
 	int16_t currentID;
 
 	if (_qname.uri.id == 2 && _qname.localName.id == 1 ) {
 		/* xsi:type --> QName type */
-		errn = exiexiForJsonDecodeAttributeXsiType(stream, state, val);
+		errn = exiEXIforJSONDecodeAttributeXsiType(stream, state, val);
 	} else {
 		currentID = state->grammarStack[state->stackIndex];
 		if (currentID >= 0) {
@@ -1750,7 +1750,7 @@ int exiexiForJsonDecodeAttributeGenericValue(bitstream_t* stream, exi_state_t* s
 	return (errn);
 }
 
-int exiexiForJsonDecodeAttribute(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 		uint16_t* qnameID, exi_value_t* val) {
 	int16_t moveOnID = 0;
 	int16_t currentID = state->grammarStack[state->stackIndex];
@@ -1872,10 +1872,10 @@ int exiexiForJsonDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 		errn = _exiDecodeQName(stream, state, qnameID, &_qname);
 		if (errn == 0) {
 			/* learn attribute ? */
-			errn = exi_exiForJson_LearnAttribute(state, _qname.uri.id,  _qname.localName.id);
+			errn = exi_EXIforJSON_LearnAttribute(state, _qname.uri.id,  _qname.localName.id);
 			if (errn == 0) {
 				/* decode attribute value */
-				errn = exiexiForJsonDecodeAttributeGenericValue(stream, state, qnameID, val);
+				errn = exiEXIforJSONDecodeAttributeGenericValue(stream, state, qnameID, val);
 			}
 		}
 		break;
@@ -1889,18 +1889,18 @@ int exiexiForJsonDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 
 
 
-int exiexiForJsonDecodeAttributeXsiNil(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONDecodeAttributeXsiNil(bitstream_t* stream, exi_state_t* state,
 		exi_value_t* val) {
 	errn = decodeBoolean(stream, &val->boolean);
 	if (errn == 0 && val->boolean) {
 		/* handle xsi:nil == true */
-		 errn = exi_exiForJson_HandleXsiNilTrue(state);
+		 errn = exi_EXIforJSON_HandleXsiNilTrue(state);
 	}
 	return (errn);
 }
 
 
-int exiexiForJsonDecodeAttributeXsiType(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONDecodeAttributeXsiType(bitstream_t* stream, exi_state_t* state,
 		exi_value_t* val) {
 
 	/* uri */
@@ -1914,7 +1914,7 @@ int exiexiForJsonDecodeAttributeXsiType(bitstream_t* stream, exi_state_t* state,
 			val->eqname.localPart = _qname.localName.id;
 
 			/* handle xsi type cast */
-			errn = exi_exiForJson_HandleXsiType(state, &val->eqname);
+			errn = exi_EXIforJSON_HandleXsiType(state, &val->eqname);
 		}
 	}
 

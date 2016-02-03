@@ -38,7 +38,7 @@
 #include <string.h>
 
 #include "StringNameTable.h"
-#include "exiForJsonNameTableEntries.h"
+#include "EXIforJSONNameTableEntries.h"
 #include "ErrorCodes.h"
 
 

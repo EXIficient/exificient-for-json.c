@@ -38,15 +38,15 @@
 *
 */
 
-#ifndef EXI_exiForJson_ENCODER_H
-#define EXI_exiForJson_ENCODER_H
+#ifndef EXI_EXIforJSON_ENCODER_H
+#define EXI_EXIforJSON_ENCODER_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "EXITypes.h"
-#include "exiForJsonEXIEncoder.h"
+#include "EXIforJSONEXIEncoder.h"
 
 /**
  * \brief 	Initialize EXI encoder
@@ -60,7 +60,7 @@ extern "C" {
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonInitEncoder(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONInitEncoder(bitstream_t* stream, exi_state_t* state,
 		exi_name_table_runtime_t runtimeTable, exi_value_table_t stringTable);
 
 /**
@@ -73,7 +73,7 @@ int exiexiForJsonInitEncoder(bitstream_t* stream, exi_state_t* state,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeStartDocument(bitstream_t* stream,
+int exiEXIforJSONEncodeStartDocument(bitstream_t* stream,
 		exi_state_t* state);
 
 /**
@@ -86,7 +86,7 @@ int exiexiForJsonEncodeStartDocument(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeEndDocument(bitstream_t* stream,
+int exiEXIforJSONEncodeEndDocument(bitstream_t* stream,
 		exi_state_t* state);
 
 /**
@@ -103,7 +103,7 @@ int exiexiForJsonEncodeEndDocument(bitstream_t* stream,
  *
  */
 int
-exiexiForJsonEncodeStartElement(bitstream_t* stream,
+exiEXIforJSONEncodeStartElement(bitstream_t* stream,
 		exi_state_t* state, uint16_t qnameID);
 
 /**
@@ -119,7 +119,7 @@ exiexiForJsonEncodeStartElement(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeStartElementNS(bitstream_t* stream,
+int exiEXIforJSONEncodeStartElementNS(bitstream_t* stream,
 		exi_state_t* state, uint16_t namespaceUriID,
 		exi_string_t* localName);
 
@@ -136,7 +136,7 @@ int exiexiForJsonEncodeStartElementNS(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeStartElementGeneric(bitstream_t* stream,
+int exiEXIforJSONEncodeStartElementGeneric(bitstream_t* stream,
 		exi_state_t* state, exi_string_t* namespaceUri,
 		exi_string_t* localName);
 
@@ -150,7 +150,7 @@ int exiexiForJsonEncodeStartElementGeneric(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeEndElement(bitstream_t* stream,
+int exiEXIforJSONEncodeEndElement(bitstream_t* stream,
 		exi_state_t* state);
 
 /**
@@ -165,7 +165,7 @@ int exiexiForJsonEncodeEndElement(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeCharacters(bitstream_t* stream,
+int exiEXIforJSONEncodeCharacters(bitstream_t* stream,
 		exi_state_t* state, exi_value_t* val);
 
 /**
@@ -181,7 +181,7 @@ int exiexiForJsonEncodeCharacters(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeAttribute(bitstream_t* stream,
+int exiEXIforJSONEncodeAttribute(bitstream_t* stream,
 		exi_state_t* state, uint16_t qnameID, exi_value_t* val);
 
 
@@ -201,7 +201,7 @@ int exiexiForJsonEncodeAttribute(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeAttributeNS(bitstream_t* stream,
+int exiEXIforJSONEncodeAttributeNS(bitstream_t* stream,
 		exi_state_t* state, uint16_t namespaceUriID,
 		exi_string_t* localName, exi_value_t* val);
 
@@ -218,7 +218,7 @@ int exiexiForJsonEncodeAttributeNS(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeAttributeGeneric(bitstream_t* stream,
+int exiEXIforJSONEncodeAttributeGeneric(bitstream_t* stream,
 		exi_state_t* state, exi_string_t* namespaceUri,
 		exi_string_t* localName, exi_value_t* val);
 
@@ -235,7 +235,7 @@ int exiexiForJsonEncodeAttributeGeneric(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeAttributeXsiNil(bitstream_t* stream,
+int exiEXIforJSONEncodeAttributeXsiNil(bitstream_t* stream,
 		exi_state_t* state, exi_value_t* val);
 
 /**
@@ -249,7 +249,7 @@ int exiexiForJsonEncodeAttributeXsiNil(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeAttributeXsiType(bitstream_t* stream,
+int exiEXIforJSONEncodeAttributeXsiType(bitstream_t* stream,
 		exi_state_t* state, exi_value_t* val);
 
 /**
@@ -265,7 +265,7 @@ int exiexiForJsonEncodeAttributeXsiType(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonEncodeListValue(bitstream_t* stream,
+int exiEXIforJSONEncodeListValue(bitstream_t* stream,
 		exi_state_t* state, uint16_t qnameID, exi_value_t* val, exi_list_t lt);
 
 #ifdef __cplusplus

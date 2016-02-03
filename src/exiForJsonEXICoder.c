@@ -32,10 +32,10 @@
 
 
 
-#ifndef EXI_exiForJson_CODER_C
-#define EXI_exiForJson_CODER_C
+#ifndef EXI_EXIforJSON_CODER_C
+#define EXI_EXIforJSON_CODER_C
 
-#include "exiForJsonEXICoder.h"
+#include "EXIforJSONEXICoder.h"
 
 #include "EXIConfig.h"
 #include "EXITypes.h"
@@ -49,7 +49,7 @@
 #endif /* DYNAMIC_ALLOCATION */
 
 
-int exi_exiForJson_PushStack(exi_state_t* state, int16_t newState, uint16_t qnameID) {
+int exi_EXIforJSON_PushStack(exi_state_t* state, int16_t newState, uint16_t qnameID) {
 	int errn = 0;
 	/* eqname_t* eqn*/
 	if ((state->stackIndex + 1) < EXI_ELEMENT_STACK_SIZE) {
@@ -63,7 +63,7 @@ int exi_exiForJson_PushStack(exi_state_t* state, int16_t newState, uint16_t qnam
 	return errn;
 }
 
-int exi_exiForJson_PopStack(exi_state_t* state) {
+int exi_EXIforJSON_PopStack(exi_state_t* state) {
 	int errn = 0;
 	if (state->stackIndex >= 1) {
 		state->stackIndex--;
@@ -73,7 +73,7 @@ int exi_exiForJson_PopStack(exi_state_t* state) {
 	return errn;
 }
 
-int exi_exiForJson_HandleXsiNilTrue(exi_state_t* state) {
+int exi_EXIforJSON_HandleXsiNilTrue(exi_state_t* state) {
 	switch (state->grammarStack[state->stackIndex]) {
 	case 46:
 		state->grammarStack[state->stackIndex] = 48;
@@ -84,7 +84,7 @@ int exi_exiForJson_HandleXsiNilTrue(exi_state_t* state) {
 	return EXI_ERROR_UNEXPECTED_ATTRIBUTE_XSI_NIL;
 }
 
-int exi_exiForJson_HandleXsiType(exi_state_t* state, exi_eqname_t* xsiType) {
+int exi_EXIforJSON_HandleXsiType(exi_state_t* state, exi_eqname_t* xsiType) {
 	switch(xsiType->namespaceURI) {
 	case 0:
 		switch(xsiType->localPart) {
@@ -325,7 +325,7 @@ int exi_exiForJson_HandleXsiType(exi_state_t* state, exi_eqname_t* xsiType) {
 }
 
 
-int exi_exiForJson_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qnameID) {
+int exi_EXIforJSON_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qnameID) {
 	int errn = EXI_ERROR_OUT_OF_RUNTIME_GRAMMAR_STACK;
 	int i;
 	int found = 1;
@@ -333,25 +333,25 @@ int exi_exiForJson_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qna
 	/* schema-informed global element --> Stack ID */
 	switch(qnameID) {
 	case 53:
-		errn = exi_exiForJson_PushStack(state, 2, 53);
+		errn = exi_EXIforJSON_PushStack(state, 2, 53);
 		break;
 	case 56:
-		errn = exi_exiForJson_PushStack(state, 16, 56);
+		errn = exi_EXIforJSON_PushStack(state, 16, 56);
 		break;
 	case 62:
-		errn = exi_exiForJson_PushStack(state, 3, 62);
+		errn = exi_EXIforJSON_PushStack(state, 3, 62);
 		break;
 	case 64:
-		errn = exi_exiForJson_PushStack(state, 18, 64);
+		errn = exi_EXIforJSON_PushStack(state, 18, 64);
 		break;
 	case 66:
-		errn = exi_exiForJson_PushStack(state, 14, 66);
+		errn = exi_EXIforJSON_PushStack(state, 14, 66);
 		break;
 	case 68:
-		errn = exi_exiForJson_PushStack(state, 19, 68);
+		errn = exi_EXIforJSON_PushStack(state, 19, 68);
 		break;
 	case 70:
-		errn = exi_exiForJson_PushStack(state, 10, 70);
+		errn = exi_EXIforJSON_PushStack(state, 10, 70);
 		break;
 
 	default:
@@ -366,7 +366,7 @@ int exi_exiForJson_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qna
 				/* runtime grammar exists already */
 
 				/* push element stack */
-				errn = exi_exiForJson_PushStack(state, (int16_t)((i+1) * (-1)), qnameID);
+				errn = exi_EXIforJSON_PushStack(state, (int16_t)((i+1) * (-1)), qnameID);
 				found = 1;
 			}
 		}
@@ -385,7 +385,7 @@ int exi_exiForJson_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qna
 			state->runtimeGrammars[state->numberOfRuntimeGrammars+1].hasEE = 1;
 
 			/* push element stack */
-			errn = exi_exiForJson_PushStack(state, (int16_t)((state->numberOfRuntimeGrammars+1) * (-1)), qnameID);
+			errn = exi_EXIforJSON_PushStack(state, (int16_t)((state->numberOfRuntimeGrammars+1) * (-1)), qnameID);
 
 			state->numberOfRuntimeGrammars = (uint16_t)(state->numberOfRuntimeGrammars + 2);
 		}
@@ -397,7 +397,7 @@ int exi_exiForJson_RetrieveAndPushGlobalGrammar(exi_state_t* state, uint16_t qna
 #ifndef __GNUC__
 #pragma warning( disable : 4100 ) /* warning unreferenced parameter 'qnameID' */
 #endif /* __GNUC__ */
-int exi_exiForJson_LearnAttribute(exi_state_t* state, uint16_t uriID, uint16_t localID) {
+int exi_EXIforJSON_LearnAttribute(exi_state_t* state, uint16_t uriID, uint16_t localID) {
 	int errn = 0;
 	int16_t currentID = state->grammarStack[state->stackIndex];
 	int16_t runtimeID;
@@ -426,13 +426,13 @@ int exi_exiForJson_LearnAttribute(exi_state_t* state, uint16_t uriID, uint16_t l
 #pragma warning( default : 4100 ) /* warning unreferenced parameter 'qnameID' */
 #endif /* __GNUC__ */
 
-int exi_exiForJson_LearnEndElement(exi_state_t* state) {
+int exi_EXIforJSON_LearnEndElement(exi_state_t* state) {
 	int errn = 0;
 	int16_t currentID = state->grammarStack[state->stackIndex];
 	int16_t runtimeID;
 
 	if (currentID < 0) {
-		if( exi_exiForJson_IsStartContent(currentID) ) {
+		if( exi_EXIforJSON_IsStartContent(currentID) ) {
 			/* check whether EE with an event code of length 1 does not exist in the current element grammar already */
 			runtimeID = (int16_t)((currentID+1)*(-1));
 
@@ -459,12 +459,12 @@ int exi_exiForJson_LearnEndElement(exi_state_t* state) {
  *
  */
 
-int exi_exiForJson_IsStartContent(int16_t ruleID) {
+int exi_EXIforJSON_IsStartContent(int16_t ruleID) {
 	/* Note: only for built-in element grammars */
 	return (ruleID % 2 != 0);
 }
 
-int exi_exiForJson_MoveToElementContentRule(exi_state_t* state) {
+int exi_EXIforJSON_MoveToElementContentRule(exi_state_t* state) {
 	int errn = 0;
 	int16_t currentID = state->grammarStack[state->stackIndex];
 	int found = 1;
@@ -678,7 +678,7 @@ int exi_exiForJson_MoveToElementContentRule(exi_state_t* state) {
 
 	if(!found) {
 		if (currentID < 0) {
-			if(exi_exiForJson_IsStartContent(currentID)) {
+			if(exi_EXIforJSON_IsStartContent(currentID)) {
 				state->grammarStack[state->stackIndex] = (int16_t)(currentID - 1);
 			}
 		} else {

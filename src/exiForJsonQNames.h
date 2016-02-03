@@ -32,8 +32,8 @@
 
 
 
-#ifndef EXI_exiForJson_QNAMES_H
-#define EXI_exiForJson_QNAMES_H
+#ifndef EXI_EXIforJSON_QNAMES_H
+#define EXI_EXIforJSON_QNAMES_H
 
 #include "EXITypes.h"
 
@@ -47,7 +47,7 @@
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonGetEQName(exi_state_t* state, uint16_t qnameID, uint16_t* namespaceURI, uint16_t* localPart);
+int exiEXIforJSONGetEQName(exi_state_t* state, uint16_t qnameID, uint16_t* namespaceURI, uint16_t* localPart);
 
 
 /**
@@ -60,7 +60,7 @@ int exiexiForJsonGetEQName(exi_state_t* state, uint16_t qnameID, uint16_t* names
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonGetQNameID(exi_state_t* state, uint16_t namespaceURI, uint16_t localPart, uint16_t* qnameID);
+int exiEXIforJSONGetQNameID(exi_state_t* state, uint16_t namespaceURI, uint16_t localPart, uint16_t* qnameID);
 
 
 /**
@@ -73,7 +73,7 @@ int exiexiForJsonGetQNameID(exi_state_t* state, uint16_t namespaceURI, uint16_t 
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonAddEQName(exi_state_t* state, uint16_t* qnameID, uint16_t namespaceURI, uint16_t localPart);
+int exiEXIforJSONAddEQName(exi_state_t* state, uint16_t* qnameID, uint16_t namespaceURI, uint16_t localPart);
 
 #endif
 

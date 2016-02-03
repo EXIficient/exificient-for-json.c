@@ -32,10 +32,10 @@
 
 
 
-#ifndef EXI_exiForJson_NAME_TABLE_ENTRIES_C
-#define EXI_exiForJson_NAME_TABLE_ENTRIES_C
+#ifndef EXI_EXIforJSON_NAME_TABLE_ENTRIES_C
+#define EXI_EXIforJSON_NAME_TABLE_ENTRIES_C
 
-#include "exiForJsonNameTableEntries.h"
+#include "EXIforJSONNameTableEntries.h"
 
 
 
@@ -96,7 +96,7 @@ static uint16_t localNames[5] = {
 };
 
 
-exi_name_table_prepopulated_t exiexiForJsonNameTablePrepopulated = { 5, localNames };
+exi_name_table_prepopulated_t exiEXIforJSONNameTablePrepopulated = { 5, localNames };
 
 
 

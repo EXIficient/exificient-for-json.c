@@ -38,8 +38,8 @@
 *
 */
 
-#ifndef EXI_exiForJson_DECODER_H
-#define EXI_exiForJson_DECODER_H
+#ifndef EXI_EXIforJSON_DECODER_H
+#define EXI_EXIforJSON_DECODER_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,7 +59,7 @@ extern "C" {
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonInitDecoder(bitstream_t* stream, exi_state_t* state,
+int exiEXIforJSONInitDecoder(bitstream_t* stream, exi_state_t* state,
 		exi_name_table_runtime_t runtimeTable, exi_value_table_t stringTable);
 
 
@@ -72,7 +72,7 @@ int exiexiForJsonInitDecoder(bitstream_t* stream, exi_state_t* state,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonGetLastQName(exi_qname_t** qname);
+int exiEXIforJSONGetLastQName(exi_qname_t** qname);
 
 
 /**
@@ -86,7 +86,7 @@ int exiexiForJsonGetLastQName(exi_qname_t** qname);
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeNextEvent(bitstream_t* stream,
+int exiEXIforJSONDecodeNextEvent(bitstream_t* stream,
 		exi_state_t* state, exi_event_t* nextEvent);
 
 
@@ -98,7 +98,7 @@ int exiexiForJsonDecodeNextEvent(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeStartDocument(bitstream_t* stream,
+int exiEXIforJSONDecodeStartDocument(bitstream_t* stream,
 		exi_state_t* state);
 
 /**
@@ -109,7 +109,7 @@ int exiexiForJsonDecodeStartDocument(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeEndDocument(bitstream_t* stream,
+int exiEXIforJSONDecodeEndDocument(bitstream_t* stream,
 		exi_state_t* state);
 
 /**
@@ -125,7 +125,7 @@ int exiexiForJsonDecodeEndDocument(bitstream_t* stream,
  *
  */
 int
-exiexiForJsonDecodeStartElement(bitstream_t* stream,
+exiEXIforJSONDecodeStartElement(bitstream_t* stream,
 		exi_state_t* state, uint16_t* qnameID);
 
 
@@ -138,7 +138,7 @@ exiexiForJsonDecodeStartElement(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeEndElement(bitstream_t* stream,
+int exiEXIforJSONDecodeEndElement(bitstream_t* stream,
 		exi_state_t* state, uint16_t* qnameID);
 
 
@@ -153,7 +153,7 @@ int exiexiForJsonDecodeEndElement(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeCharacters(bitstream_t* stream,
+int exiEXIforJSONDecodeCharacters(bitstream_t* stream,
 		exi_state_t* state, exi_value_t* val);
 
 
@@ -169,7 +169,7 @@ int exiexiForJsonDecodeCharacters(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeAttribute(bitstream_t* stream,
+int exiEXIforJSONDecodeAttribute(bitstream_t* stream,
 		exi_state_t* state, uint16_t* qnameID, exi_value_t* val);
 
 
@@ -184,7 +184,7 @@ int exiexiForJsonDecodeAttribute(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeAttributeXsiNil(bitstream_t* stream,
+int exiEXIforJSONDecodeAttributeXsiNil(bitstream_t* stream,
 		exi_state_t* state, exi_value_t* val);
 
 
@@ -199,7 +199,7 @@ int exiexiForJsonDecodeAttributeXsiNil(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeAttributeXsiType(bitstream_t* stream,
+int exiEXIforJSONDecodeAttributeXsiType(bitstream_t* stream,
 		exi_state_t* state, exi_value_t* val);
 
 
@@ -216,7 +216,7 @@ int exiexiForJsonDecodeAttributeXsiType(bitstream_t* stream,
  * \return                  	Error-Code <> 0
  *
  */
-int exiexiForJsonDecodeListValue(bitstream_t* stream, exi_state_t* state, uint16_t qnameID,
+int exiEXIforJSONDecodeListValue(bitstream_t* stream, exi_state_t* state, uint16_t qnameID,
 		exi_value_t* val, exi_list_t lt);
 
 #ifdef __cplusplus

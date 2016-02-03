@@ -45,9 +45,9 @@
 #include <stdlib.h>
 
 #include "EXIConfig.h"
-#include "exiForJsonEXIDecoder.h"
+#include "EXIforJSONEXIDecoder.h"
 #include "StringNameTable.h"
-#include "exiForJsonEXIEncoder.h"
+#include "EXIforJSONEXIEncoder.h"
 #include "EXITypes.h"
 #include "ByteStream.h"
 #include "ErrorCodes.h"
@@ -68,8 +68,8 @@ uint8_t bufferOut[BUFFER_SIZE];
 
 
 /* String table memory setup */
-uint16_t numberOfLocalStringsDecode[EXI_exiForJsonMAX_NUMBER_OF_QNAMES];
-uint16_t numberOfLocalStringsEncode[EXI_exiForJsonMAX_NUMBER_OF_QNAMES];
+uint16_t numberOfLocalStringsDecode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
+uint16_t numberOfLocalStringsEncode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
 
 #if EXI_DEBUG == 1
 # define DEBUG_PRINTF(x) printf x
@@ -96,15 +96,15 @@ int main(int argc, char *argv[]) {
 	exi_state_t stateEncode;
 	exi_event_t event;
 	uint16_t qnameID = 0; /* qname */
-	uint16_t lastKnownQNameID = EXI_exiForJsonNUMBER_OF_PREPOPULATED_QNAMES - 1;
+	uint16_t lastKnownQNameID = EXI_EXIforJSONNUMBER_OF_PREPOPULATED_QNAMES - 1;
 	exi_qname_t* qname;
 	exi_value_t val;
 
 	exi_name_table_runtime_t runtimeTableDecode;
 	exi_name_table_runtime_t runtimeTableEncode;
 
-	exi_value_table_t stringTableDecode = { 0, EXI_exiForJsonMAX_NUMBER_OF_QNAMES, numberOfLocalStringsDecode, NULL };
-	exi_value_table_t stringTableEncode = { 0, EXI_exiForJsonMAX_NUMBER_OF_QNAMES, numberOfLocalStringsEncode, NULL };
+	exi_value_table_t stringTableDecode = { 0, EXI_EXIforJSONMAX_NUMBER_OF_QNAMES, numberOfLocalStringsDecode, NULL };
+	exi_value_table_t stringTableEncode = { 0, EXI_EXIforJSONMAX_NUMBER_OF_QNAMES, numberOfLocalStringsEncode, NULL };
 
 	exi_value_string_table_t stringTableValuesDecode;
 	exi_value_string_table_t stringTableValuesEncode;
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
 	/* init runtime table */
 	errn = exiInitNameTableRuntime(&runtimeTableDecode);
 	if (errn==0) {
-		errn = exiexiForJsonInitDecoder(&iStream, &stateDecode, runtimeTableDecode, stringTableDecode);
+		errn = exiEXIforJSONInitDecoder(&iStream, &stateDecode, runtimeTableDecode, stringTableDecode);
 	}
 	if (errn) {
 		DEBUG_PRINTF(("[Init-Decode-ERROR] %d \n", errn));
@@ -180,7 +180,7 @@ int main(int argc, char *argv[]) {
 	/* init encoder (write header, set initial state) */
 	errn = exiInitNameTableRuntime(&runtimeTableEncode);
 	if (errn==0) {
-		errn = exiexiForJsonInitEncoder(&oStream, &stateEncode, runtimeTableEncode, stringTableEncode);
+		errn = exiEXIforJSONInitEncoder(&oStream, &stateEncode, runtimeTableEncode, stringTableEncode);
 	}
 	if (errn) {
 		DEBUG_PRINTF(("[Init-Encode-ERROR] %d \n", errn));
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 			return errn;
 		}
 
-		errn = exiexiForJsonDecodeNextEvent(&iStream, &stateDecode,
+		errn = exiEXIforJSONDecodeNextEvent(&iStream, &stateDecode,
 				&event);
 		if (errn) {
 			DEBUG_PRINTF(("[Decode-ERROR] %d \n", errn));
@@ -205,7 +205,7 @@ int main(int argc, char *argv[]) {
 		switch (event) {
 		case EXI_EVENT_START_DOCUMENT:
 			/* decode */
-			errn = exiexiForJsonDecodeStartDocument(&iStream,
+			errn = exiEXIforJSONDecodeStartDocument(&iStream,
 					&stateDecode);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-SD] %d \n", errn));
@@ -213,12 +213,12 @@ int main(int argc, char *argv[]) {
 			}
 			DEBUG_PRINTF((">> START_DOCUMENT \n"));
 			/* encode */
-			errn = exiexiForJsonEncodeStartDocument(&oStream,
+			errn = exiEXIforJSONEncodeStartDocument(&oStream,
 					&stateEncode);
 			break;
 		case EXI_EVENT_END_DOCUMENT:
 			/* decode */
-			errn = exiexiForJsonDecodeEndDocument(&iStream,
+			errn = exiEXIforJSONDecodeEndDocument(&iStream,
 					&stateDecode);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-ED] %d \n", errn));
@@ -226,7 +226,7 @@ int main(int argc, char *argv[]) {
 			}
 			DEBUG_PRINTF((">> END_DOCUMENT \n"));
 			/* encode */
-			errn = exiexiForJsonEncodeEndDocument(&oStream,
+			errn = exiEXIforJSONEncodeEndDocument(&oStream,
 					&stateEncode);
 			/* signalize end of document */
 			noEndOfDocument = 0; /* false */
@@ -235,7 +235,7 @@ int main(int argc, char *argv[]) {
 		case EXI_EVENT_START_ELEMENT_GENERIC:
 		case EXI_EVENT_START_ELEMENT_GENERIC_UNDECLARED:
 			/* decode */
-			errn = exiexiForJsonDecodeStartElement(&iStream,
+			errn = exiEXIforJSONDecodeStartElement(&iStream,
 					&stateDecode, &qnameID);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-SE] %d \n", errn));
@@ -247,25 +247,25 @@ int main(int argc, char *argv[]) {
 				/* new qname */
 				lastKnownQNameID = qnameID;
 				/* URI or LocalName known ? */
-				errn = exiexiForJsonGetLastQName(&qname);
+				errn = exiEXIforJSONGetLastQName(&qname);
 				if(qname->uri.type == EXI_NAME_ENTRY_TYPE_ID) {
 					/* local name only new */
-					errn = exiexiForJsonEncodeStartElementNS(&oStream,
+					errn = exiEXIforJSONEncodeStartElementNS(&oStream,
 							&stateEncode, qname->uri.id, &qname->localName.str);
 				} else {
 					/* both, uri and localname new */
-					errn = exiexiForJsonEncodeStartElementGeneric(&oStream,
+					errn = exiEXIforJSONEncodeStartElementGeneric(&oStream,
 							&stateEncode, &qname->uri.str, &qname->localName.str);
 				}
 			} else {
-				errn = exiexiForJsonEncodeStartElement(&oStream,
+				errn = exiEXIforJSONEncodeStartElement(&oStream,
 						&stateEncode, qnameID);
 			}
 			break;
 		case EXI_EVENT_END_ELEMENT:
 		case EXI_EVENT_END_ELEMENT_UNDECLARED:
 			/* decode */
-			errn = exiexiForJsonDecodeEndElement(&iStream,
+			errn = exiEXIforJSONDecodeEndElement(&iStream,
 					&stateDecode, &qnameID);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-EE] %d \n", errn));
@@ -273,14 +273,14 @@ int main(int argc, char *argv[]) {
 			}
 			DEBUG_PRINTF(("<< EE \n"));
 			/* encode */
-			errn = exiexiForJsonEncodeEndElement(&oStream,
+			errn = exiEXIforJSONEncodeEndElement(&oStream,
 							&stateEncode);
 			break;
 		case EXI_EVENT_CHARACTERS:
 		case EXI_EVENT_CHARACTERS_GENERIC:
 		case EXI_EVENT_CHARACTERS_GENERIC_UNDECLARED:
 			/* decode */
-			errn = exiexiForJsonDecodeCharacters(&iStream,
+			errn = exiEXIforJSONDecodeCharacters(&iStream,
 					&stateDecode, &val);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-CH] %d \n", errn));
@@ -289,13 +289,13 @@ int main(int argc, char *argv[]) {
 			DEBUG_PRINTF((" CH: "));
 			debugValue(&val, &stringTableDecode, stateDecode.elementStack[stateDecode.stackIndex]);
 			/* encode */
-			errn = exiexiForJsonEncodeCharacters(&oStream,
+			errn = exiEXIforJSONEncodeCharacters(&oStream,
 						&stateEncode, &val);
 
 			/* list value: special behavior */
 			if (val.type == EXI_DATATYPE_LIST) {
 				for(k=0; k<val.list.len; k++) {
-					errn = exiexiForJsonDecodeListValue(&iStream, &stateDecode, qnameID, &val, val.list);
+					errn = exiEXIforJSONDecodeListValue(&iStream, &stateDecode, qnameID, &val, val.list);
 					if (errn) {
 						DEBUG_PRINTF(("[Decode-ERROR-CH_LIST] %d \n", errn));
 						return errn;
@@ -303,7 +303,7 @@ int main(int argc, char *argv[]) {
 					DEBUG_PRINTF((" CH: "));
 					debugValue(&val, &stringTableDecode, stateDecode.elementStack[stateDecode.stackIndex]);
 					/* encode list value */
-					errn = exiexiForJsonEncodeListValue(&oStream, &stateEncode, qnameID,
+					errn = exiEXIforJSONEncodeListValue(&oStream, &stateEncode, qnameID,
 									&val, val.list);
 				}
 			}
@@ -313,7 +313,7 @@ int main(int argc, char *argv[]) {
 		case EXI_EVENT_ATTRIBUTE_GENERIC_UNDECLARED:
 		case EXI_EVENT_ATTRIBUTE_INVALID_VALUE:
 			/* decode */
-			errn = exiexiForJsonDecodeAttribute(&iStream, &stateDecode,
+			errn = exiEXIforJSONDecodeAttribute(&iStream, &stateDecode,
 					&qnameID, &val);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-AT] %d \n", errn));
@@ -326,24 +326,24 @@ int main(int argc, char *argv[]) {
 				/* new qname */
 				lastKnownQNameID = qnameID;
 				/* URI or LocalName known ? */
-				errn = exiexiForJsonGetLastQName(&qname);
+				errn = exiEXIforJSONGetLastQName(&qname);
 				if(qname->uri.type == EXI_NAME_ENTRY_TYPE_ID) {
 					/* local name only new */
-					errn = exiexiForJsonEncodeAttributeNS(&oStream,
+					errn = exiEXIforJSONEncodeAttributeNS(&oStream,
 							&stateEncode, qname->uri.id, &qname->localName.str, &val);
 				} else {
 					/* both, uri and localname new */
-					errn = exiexiForJsonEncodeAttributeGeneric(&oStream,
+					errn = exiEXIforJSONEncodeAttributeGeneric(&oStream,
 							&stateEncode, &qname->uri.str, &qname->localName.str, &val);
 				}
 			} else {
-				errn = exiexiForJsonEncodeAttribute(&oStream, &stateEncode,
+				errn = exiEXIforJSONEncodeAttribute(&oStream, &stateEncode,
 						qnameID, &val);
 			}
 			break;
 		case EXI_EVENT_ATTRIBUTE_XSI_NIL:
 			/* decode */
-			errn = exiexiForJsonDecodeAttributeXsiNil(&iStream,
+			errn = exiEXIforJSONDecodeAttributeXsiNil(&iStream,
 					&stateDecode, &val);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-AT-NIL] %d \n", errn));
@@ -351,12 +351,12 @@ int main(int argc, char *argv[]) {
 			}
 			DEBUG_PRINTF((" AT {xsi}nil == %i \n", val.boolean));
 			/* encode */
-			errn = exiexiForJsonEncodeAttributeXsiNil(&oStream,
+			errn = exiEXIforJSONEncodeAttributeXsiNil(&oStream,
 					&stateEncode, &val);
 			break;
 		case EXI_EVENT_ATTRIBUTE_XSI_TYPE:
 			/* decode */
-			errn = exiexiForJsonDecodeAttributeXsiType(&iStream,
+			errn = exiEXIforJSONDecodeAttributeXsiType(&iStream,
 					&stateDecode, &val);
 			if (errn) {
 				DEBUG_PRINTF(("[Decode-ERROR-AT-TYPE] %d \n", errn));
@@ -364,7 +364,7 @@ int main(int argc, char *argv[]) {
 			}
 			DEBUG_PRINTF((" AT {type}type == {%d}%d \n", val.eqname.namespaceURI, val.eqname.localPart));
 			/* encode */
-			errn = exiexiForJsonEncodeAttributeXsiType(&oStream,
+			errn = exiEXIforJSONEncodeAttributeXsiType(&oStream,
 					&stateEncode, &val);
 			break;
 		default:
