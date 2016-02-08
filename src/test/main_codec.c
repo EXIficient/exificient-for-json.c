@@ -80,7 +80,7 @@ uint16_t numberOfLocalStringsEncode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
 static void debugValue(exi_value_t* val, exi_value_table_t* valueTable, uint16_t qnameID);
 
 
-int main(int argc, char *argv[]) {
+int main_codec(int argc, char *argv[]) {
 
 	int errn = 0;
 	int noEndOfDocument;
