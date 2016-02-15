@@ -45,9 +45,10 @@
 extern "C" {
 #endif
 
+#include "EXIConfig.h"
+
 #if MEMORY_ALLOCATION == DYNAMIC_ALLOCATION
 
-#include "EXIConfig.h"
 #include "EXITypes.h"
 
 

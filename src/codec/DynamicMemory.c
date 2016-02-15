@@ -51,7 +51,7 @@ int exiAllocateDynamicStringMemory(exi_string_t* s, uint16_t length) {
 	int errn = 0;
 	/* allocate dynamic memory */
 	s->size = length; /* length << 1; */ /* length * 2 */
-	s->characters = (uint32_t*) malloc(s->size * sizeof(uint32_t));
+	s->characters = (exi_string_character_t*) malloc(s->size * sizeof(exi_string_character_t));
 
 	if(NULL == s->characters) {
 		s->size = 0;
