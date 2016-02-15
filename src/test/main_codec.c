@@ -62,7 +62,7 @@
 /* 64 kilobytes = 65 536 bytes */
 /* 1 megabyte = 1 048 576 bytes*/
 /* 4 megabytes = 4 194 304 bytes */
-#define BUFFER_SIZE 65535
+#define BUFFER_SIZE 8192
 uint8_t bufferIn[BUFFER_SIZE];
 uint8_t bufferOut[BUFFER_SIZE];
 

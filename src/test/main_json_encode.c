@@ -34,7 +34,7 @@
 #define EXI_DEBUG 1
 
 
-#define BUFFER_SIZE 65535
+#define BUFFER_SIZE 8192
 uint8_t bufferOut[BUFFER_SIZE];
 /* String table memory setup */
 uint16_t numberOfLocalStringsDecode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
