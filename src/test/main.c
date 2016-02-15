@@ -30,17 +30,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+#define RUN_EXI_CODEC 1
+#define RUN_JSON_ENCODE 2
+#define RUN_EXIforJSON_DECODE 3
+
+#define MAIN_RUN RUN_EXIforJSON_DECODE
+
+
+
+#if MAIN_RUN == RUN_EXI_CODEC
 int main_codec();
-/*int main_json_encode(); */
+#endif /* RUN_EXI_CODEC */
+#if MAIN_RUN == RUN_JSON_ENCODE
+int main_json_encode();
+#endif /* RUN_JSON_ENCODE */
+#if MAIN_RUN == RUN_EXIforJSON_DECODE
+int main_exiforjson_decode();
+#endif /* RUN_EXIforJSON_DECODE */
+
+
 
 int main(int argc, char *argv[]) {
-#if 1 == 1
+#if MAIN_RUN == RUN_EXI_CODEC
 	/* EXI codec only */
 	return main_codec(argc, argv);
-#elif 2  == -2
+#endif /* RUN_EXI_CODEC */
+#if MAIN_RUN == RUN_JSON_ENCODE
 	/* JSON encode example  */
 	return main_json_encode(argc, argv);
-#endif
-
+#endif /* RUN_JSON_ENCODE */
+#if MAIN_RUN == RUN_EXIforJSON_DECODE
+	/* JSON decode example  */
+	return main_exiforjson_decode(argc, argv);
+#endif /* RUN_EXIforJSON_DECODE */
 }
 

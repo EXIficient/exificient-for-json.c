@@ -6,16 +6,19 @@
 C_SRCS += \
 ../src/test/main.c \
 ../src/test/main_codec.c \
+../src/test/main_exiforjson_decode.c \
 ../src/test/main_json_encode.c 
 
 OBJS += \
 ./src/test/main.o \
 ./src/test/main_codec.o \
+./src/test/main_exiforjson_decode.o \
 ./src/test/main_json_encode.o 
 
 C_DEPS += \
 ./src/test/main.d \
 ./src/test/main_codec.d \
+./src/test/main_exiforjson_decode.d \
 ./src/test/main_json_encode.d 
 
 
