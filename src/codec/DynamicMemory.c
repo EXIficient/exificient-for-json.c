@@ -49,9 +49,14 @@
 
 int exiAllocateDynamicStringMemory(exi_string_t* s, uint16_t length) {
 	int errn = 0;
+	int extraChar = 0;
+#if STRING_REPRESENTATION == STRING_REPRESENTATION_ASCII
+	extraChar = 1; /* null terminator */
+#endif /* STRING_REPRESENTATION_ASCII */
+
 	/* allocate dynamic memory */
 	s->size = length; /* length << 1; */ /* length * 2 */
-	s->characters = (exi_string_character_t*) malloc(s->size * sizeof(exi_string_character_t));
+	s->characters = (exi_string_character_t*) malloc((length+extraChar) * sizeof(exi_string_character_t));
 
 	if(NULL == s->characters) {
 		s->size = 0;

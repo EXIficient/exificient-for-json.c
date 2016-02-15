@@ -73,6 +73,10 @@ static int __exiAddStringValue(exi_value_table_t* valueTable,
 		exi_string_t* sv, uint16_t qnameID) {
 	uint16_t currLen;
 	int errn;
+	int extraChar = 0;
+#if STRING_REPRESENTATION == STRING_REPRESENTATION_ASCII
+	extraChar = 1; /* null terminator */
+#endif /* STRING_REPRESENTATION_ASCII */
 
 
 #if MEMORY_ALLOCATION == DYNAMIC_ALLOCATION
@@ -140,8 +144,8 @@ static int __exiAddStringValue(exi_value_table_t* valueTable,
 #endif /* DYNAMIC_ALLOCATION */
 
 		if(errn == 0) {
-			/* copy codepoints */
-			if ( memcpy(valueTable->valueStringTable->strs[currLen].str.characters, sv->characters, sv->len*sizeof(uint32_t)) == NULL ) {
+			/* copy codepoints or ASCII */
+			if ( memcpy(valueTable->valueStringTable->strs[currLen].str.characters, sv->characters, (extraChar+sv->len)*sizeof(exi_string_character_t)) == NULL ) {
 				errn = EXI_ERROR_STRINGVALUES_OUT_OF_MEMORY;
 			}
 
