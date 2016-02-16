@@ -23,46 +23,64 @@
  * @author Daniel.Peintner.EXT@siemens.com
  * @contact Joerg.Heuer@siemens.com
  *
- * <p>Switch for sample programs</p>
+ * <p>Sample program</p>
  *
  ********************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+#include "EXIforJSONEncoder.h"
+#include "EXIforJSONDecoder.h"
 
-#define RUN_EXI_CODEC 1
-#define RUN_JSON_ENCODE 2
-#define RUN_EXIforJSON_DECODE 3
-
-#define MAIN_RUN RUN_EXIforJSON_DECODE
-
-
-
-#if MAIN_RUN == RUN_EXI_CODEC
-int main_codec();
-#endif /* RUN_EXI_CODEC */
-#if MAIN_RUN == RUN_JSON_ENCODE
-int main_json_encode();
-#endif /* RUN_JSON_ENCODE */
-#if MAIN_RUN == RUN_EXIforJSON_DECODE
-int main_exiforjson_decode();
-#endif /* RUN_EXIforJSON_DECODE */
-
+#define BUFFER_SIZE 8192
 
 
 int main(int argc, char *argv[]) {
-#if MAIN_RUN == RUN_EXI_CODEC
-	/* EXI codec only */
-	return main_codec(argc, argv);
-#endif /* RUN_EXI_CODEC */
-#if MAIN_RUN == RUN_JSON_ENCODE
+	int errn = 0;
+
 	/* JSON encode example  */
-	return main_json_encode(argc, argv);
-#endif /* RUN_JSON_ENCODE */
-#if MAIN_RUN == RUN_EXIforJSON_DECODE
-	/* JSON decode example  */
-	return main_exiforjson_decode(argc, argv);
-#endif /* RUN_EXIforJSON_DECODE */
+	/* char *JSON_STRING_IN = "{\"keyNumber\":   123, \"k\":-12.34, \"keyArrayStrings\": [ \"s1\", \"s2\" ] , \"valid\": true, \"foo\": null}"; */
+	/* test01.json */
+	/* char *JSON_STRING_IN = "{\"keyNumber\":   123, \"keyArrayStrings\": [ \"s1\", \"s2\" ] }"; */
+	/* http://json.org/example.html #1 */
+	/* char *JSON_STRING_IN = "{\n    \"glossary\": {\n        \"title\": \"example glossary\",\n\t\t\"GlossDiv\": {\n            \"title\": \"S\",\n\t\t\t\"GlossList\": {\n                \"GlossEntry\": {\n                    \"ID\": \"SGML\",\n\t\t\t\t\t\"SortAs\": \"SGML\",\n\t\t\t\t\t\"GlossTerm\": \"Standard Generalized Markup Language\",\n\t\t\t\t\t\"Acronym\": \"SGML\",\n\t\t\t\t\t\"Abbrev\": \"ISO 8879:1986\",\n\t\t\t\t\t\"GlossDef\": {\n                        \"para\": \"A meta-markup language, used to create markup languages such as DocBook.\",\n\t\t\t\t\t\t\"GlossSeeAlso\": [\"GML\", \"XML\"]\n                    },\n\t\t\t\t\t\"GlossSee\": \"markup\"\n                }\n            }\n        }\n    }\n}"; */
+	/* http://json.org/example.html #2 */
+	/* char *JSON_STRING_IN = "{\"menu\": {\n  \"id\": \"file\",\n  \"value\": \"File\",\n  \"popup\": {\n    \"menuitem\": [\n      {\"value\": \"New\", \"onclick\": \"CreateNewDoc()\"},\n      {\"value\": \"Open\", \"onclick\": \"OpenDoc()\"},\n      {\"value\": \"Close\", \"onclick\": \"CloseDoc()\"}\n    ]\n  }\n}}"; */
+	/* http://json.org/example.html #3 */
+	char *JSON_STRING_IN = "{\"widget\": {\n    \"debug\": \"on\",\n    \"window\": {\n        \"title\": \"Sample Konfabulator Widget\",\n        \"name\": \"main_window\",\n        \"width\": 500,\n        \"height\": 500\n    },\n    \"image\": { \n        \"src\": \"Images/Sun.png\",\n        \"name\": \"sun1\",\n        \"hOffset\": 250,\n        \"vOffset\": 250,\n        \"alignment\": \"center\"\n    },\n    \"text\": {\n        \"data\": \"Click Here\",\n        \"size\": 36,\n        \"style\": \"bold\",\n        \"name\": \"text1\",\n        \"hOffset\": 250,\n        \"vOffset\": 100,\n        \"alignment\": \"center\",\n        \"onMouseUp\": \"sun1.opacity = (sun1.opacity / 100) * 90;\"\n    }\n}}";
+	const size_t lenOut = strlen(JSON_STRING_IN) + 100; /* some extra space for decoding differences e.g, number 1 -> 1E0 etc */
+	char JSON_STRING_OUT[lenOut];
+
+
+	uint8_t buffer[BUFFER_SIZE];
+	size_t posEncode = 0;
+	size_t posDecode = 0;
+
+	printf("FROM: \n%s \n", JSON_STRING_IN);
+
+	errn = encodeEXIforJSON(JSON_STRING_IN, strlen(JSON_STRING_IN), buffer, BUFFER_SIZE, &posEncode);
+	if( errn == 0 ) {
+		/* OK so far */
+		printf("Encoding JSON (len=%d) to EXIforJSON (len=%d) was successful \n", strlen(JSON_STRING_IN), posEncode);
+
+		/* Try to transform it back to JSON again */
+		errn = decodeEXIforJSON(buffer, BUFFER_SIZE, &posDecode, JSON_STRING_OUT, lenOut);
+
+		if( errn == 0 ) {
+			/* OK */
+			printf("Decoding EXIforJSON (len=%d) to JSON (len=%d) to was successful \n", posEncode, strlen(JSON_STRING_OUT));
+			printf("TO: \n%s \n", JSON_STRING_OUT);
+		} else {
+			/* ERROR */
+			printf("Decoding EXIforJSON to JSON failed due to error %d \n", errn);
+		}
+	} else {
+		/* ERROR */
+		printf("Encoding JSON to EXIforJSON failed due to error %d \n", errn);
+	}
+
+	return errn;
 }
 

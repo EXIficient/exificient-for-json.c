@@ -54,7 +54,7 @@ extern "C" {
  *
  * 			Byte array or file
  * */
-#define EXI_STREAM FILE_STREAM
+#define EXI_STREAM BYTE_ARRAY
 
 
 

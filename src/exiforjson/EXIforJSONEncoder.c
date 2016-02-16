@@ -23,27 +23,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "jsmn.h"
+#include "EXIforJSONEncoder.h"
 
+#include "jsmn.h"
 #include "EXITypes.h"
 #include "EXIforJSONQNameDefines.h"
 #include "StringNameTable.h"
 #include "EXIforJSONEXIEncoder.h"
 
+
+#ifndef EXI_FOR_JSON_ENCODER_C
+#define EXI_FOR_JSON_ENCODER_C
+
 /** EXI Debug mode */
-#define EXI_DEBUG 1
+#define EXI_ENCODE_DEBUG 0
 
+#if EXI_ENCODE_DEBUG == 1
+# define DEBUG_PRINTF(x) printf x
+#else
+# define DEBUG_PRINTF(x) do {} while (0)
+#endif
 
-#define BUFFER_SIZE 8192
-uint8_t bufferOut[BUFFER_SIZE];
-/* String table memory setup */
-uint16_t numberOfLocalStringsDecode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
-uint16_t numberOfLocalStringsEncode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
+static uint16_t numberOfLocalStringsEncode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
 
-exi_value_t val;
-
-/* const char *JSON_STRING = "{\"keyNumber\":   123, \"k\":-12.34, \"keyArrayStrings\": [ \"s1\", \"s2\" ] , \"valid\": true, \"foo\": null}"; */
-char *JSON_STRING = "{\"keyNumber\":   123, \"keyArrayStrings\": [ \"s1\", \"s2\" ] }"; /* test01.json */
+static exi_value_t val;
 
 typedef enum {MAP, ARRAY, STRING, NUMBER, TRUE, FALSE, NUL} json_values_t;
 
@@ -79,7 +82,7 @@ static int dumpFloat(const char *js, int start, int end, bitstream_t* stream, ex
 	}
 
 	/* print number */
-	printf("float M:%d, E:%d ", mantissa, exponent);
+	DEBUG_PRINTF(("float M:%d, E:%d ", mantissa, exponent));
 
 
 	val.type = EXI_DATATYPE_FLOAT;
@@ -95,18 +98,18 @@ static int pendingKeyEnd;
 
 static int dumpKey(const char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_state_t* state) {
 	if (t->type == JSMN_STRING) {
-		printf("#%.*s#", t->end - t->start, js+t->start);
+		DEBUG_PRINTF(("#%.*s#", t->end - t->start, js+t->start));
 		pendingKeyStart = t->start;
 		pendingKeyEnd = t->end;
 	} else {
 		/* error */
-		printf("Error: no key \n");
+		DEBUG_PRINTF(("Error: no key \n"));
 	}
 
 	return 1;
 }
 
-static int checkPendingKey(char *js, json_values_t type, bitstream_t* stream, exi_state_t* state) {
+static int checkPendingKey(const char *js, json_values_t type, bitstream_t* stream, exi_state_t* state) {
 	int errn = 0;
 
 	if(type == MAP) {
@@ -134,7 +137,7 @@ static int checkPendingKey(char *js, json_values_t type, bitstream_t* stream, ex
 		val.str.type = EXI_STRING_VALUE_MISS;
 		val.str.miss.len = pendingKeyEnd - pendingKeyStart;
 		val.str.miss.size = val.str.miss.len;
-		val.str.miss.characters = &js[pendingKeyStart];
+		val.str.miss.characters = (exi_string_character_t*)&js[pendingKeyStart];
 
 		errn = exiEXIforJSONEncodeAttribute(stream, state, EXI_EXIforJSON_0_key, &val);
 
@@ -147,7 +150,7 @@ static int checkPendingKey(char *js, json_values_t type, bitstream_t* stream, ex
  * An example of reading JSON and printing its content
  */
 
-static int dump(char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_state_t* state) {
+static int dump(const char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_state_t* state) {
 	int i, j;
 	int errn = 0;
 	if (count == 0) {
@@ -157,21 +160,21 @@ static int dump(char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_s
 		/* number, true, false, or null */
 		if(js[t->start] == 't') {
 			checkPendingKey(js, TRUE, stream, state);
-			printf("booleanTrue \n");
+			DEBUG_PRINTF(("booleanTrue \n"));
 			val.type = EXI_DATATYPE_BOOLEAN;
 			val.boolean = 1;
 			errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
 			errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(boolean) */
 		} else if(js[t->start] == 'f') {
 			checkPendingKey(js, FALSE, stream, state);
-			printf("booleanFalse \n");
+			DEBUG_PRINTF(("booleanFalse \n"));
 			val.type = EXI_DATATYPE_BOOLEAN;
 			val.boolean = 0;
 			errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
 			errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(boolean) */
 		} else if(js[t->start] == 'n') {
 			checkPendingKey(js, NUL, stream, state);
-			printf("NULL \n");
+			DEBUG_PRINTF(("NULL \n"));
 			errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(null) */
 		} else {
 			checkPendingKey(js, NUMBER, stream, state);
@@ -185,49 +188,49 @@ static int dump(char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_s
 		return 1;
 	} else if (t->type == JSMN_STRING) {
 		checkPendingKey(js, STRING, stream, state);
-		printf("'%.*s'", t->end - t->start, js+t->start);
+		DEBUG_PRINTF(("'%.*s'", t->end - t->start, js+t->start));
 		/* TODO string table hit */
 		val.type = EXI_DATATYPE_STRING;
 		val.str.type = EXI_STRING_VALUE_MISS;
 		val.str.miss.len = t->end - t->start;
 		val.str.miss.size = val.str.miss.len;
-		val.str.miss.characters = &js[t->start];
+		val.str.miss.characters = (exi_string_character_t*)&js[t->start];
 		errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
 		errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(string) */
 		return 1;
 	} else if (t->type == JSMN_OBJECT) {
 		checkPendingKey(js, MAP, stream, state);
-		printf("{\n");
+		DEBUG_PRINTF(("{\n"));
 
 
 		if (errn == 0) {
 			j = 0;
 			for (i = 0; i < t->size; i++) {
 				j += dumpKey(js, t+1+j, count-j, stream, state);
-				printf(": ");
+				DEBUG_PRINTF((": "));
 				j += dump(js, t+1+j, count-j, stream, state);
-				printf("\n");
+				DEBUG_PRINTF(("\n"));
 			}
 
-			printf("}\n");
+			DEBUG_PRINTF(("}\n"));
 			errn = exiEXIforJSONEncodeEndElement(stream, state);  /* EE(map) */
 			if(errn != 0) {
-				printf("EXI Error: end object\n");
+				DEBUG_PRINTF(("EXI Error: end object\n"));
 			}
 		} else {
-			printf("EXI Error: start object\n");
+			DEBUG_PRINTF(("EXI Error: start object\n"));
 		}
 		return j+1;
 	} else if (t->type == JSMN_ARRAY) {
 		checkPendingKey(js, ARRAY, stream, state);
 		j = 0;
-		printf("[\n");
+		DEBUG_PRINTF(("[\n"));
 		for (i = 0; i < t->size; i++) {
-			printf("   - ");
+			DEBUG_PRINTF(("   - "));
 			j += dump(js, t+1+j, count-j, stream, state);
-			printf("\n");
+			DEBUG_PRINTF(("\n"));
 		}
-		printf("]\n");
+		DEBUG_PRINTF(("]\n"));
 		errn = exiEXIforJSONEncodeEndElement(stream, state);  /* EE(array) */
 
 		return j+1;
@@ -235,7 +238,7 @@ static int dump(char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_s
 	return 0;
 }
 
-int main_json_encode() {
+int encodeEXIforJSON(const char *json, size_t jlen, uint8_t* buffer, size_t blen, size_t* posEncode) {
 	int r;
 	int errn = 0;
 	jsmn_parser p;
@@ -245,7 +248,6 @@ int main_json_encode() {
 
 	/* EXI encoder setup*/
 	bitstream_t oStream;
-	uint8_t bufferOut[BUFFER_SIZE];
 	exi_name_table_runtime_t runtimeTableEncode;
 	exi_state_t stateEncode;
 	exi_value_table_t stringTableEncode = { 0, EXI_EXIforJSONMAX_NUMBER_OF_QNAMES, numberOfLocalStringsEncode, NULL };
@@ -256,11 +258,10 @@ int main_json_encode() {
 	stringTableEncode.valueStringTable = &stringTableValuesEncode;
 
 	/* setup output stream */
-	uint16_t posEncode = 0;
-	oStream.size = BUFFER_SIZE;
-	oStream.data = bufferOut;
-	oStream.pos = &posEncode;
-	oStream.file = fopen("jsonTest.exi4json", "wb");
+	oStream.size = blen;
+	oStream.data = buffer;
+	oStream.pos = (uint16_t*)posEncode;
+
 	/* init encoder (write header, set initial state) */
 	errn = exiInitNameTableRuntime(&runtimeTableEncode);
 	if (errn==0) {
@@ -268,22 +269,25 @@ int main_json_encode() {
 	}
 
 	jsmn_init(&p);
-	r = jsmn_parse(&p, JSON_STRING, strlen(JSON_STRING), t, sizeof(t)/sizeof(t[0]));
+	r = jsmn_parse(&p, json, strlen(json), t, sizeof(t)/sizeof(t[0]));
 	if (r < 0) {
-		printf("Failed to parse JSON: %d\n", r);
+		DEBUG_PRINTF(("Failed to parse JSON: %d\n", r));
 		errn = 1;
 	} else {
 		errn = exiEXIforJSONEncodeStartDocument(&oStream, &stateEncode);
 		if(errn == 0) {
-			dump(JSON_STRING, t, p.toknext, &oStream, &stateEncode);
+			dump(json, t, p.toknext, &oStream, &stateEncode);
 			errn = exiEXIforJSONEncodeEndDocument(&oStream, &stateEncode);
 		}
 
 		if (errn) {
-			printf("[Encode-ERROR] %d \n", errn);
+			DEBUG_PRINTF(("[Encode-ERROR] %d \n", errn));
 		}
 	}
 
 	return errn;
 }
 
+
+
+#endif

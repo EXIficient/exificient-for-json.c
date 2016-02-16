@@ -32,6 +32,7 @@
 									<listOptionValue builtIn="false" value="&quot;../src/codec&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../src/test&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../src/json&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../src/exiforjson&quot;"/>
 								</option>
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1880660058" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.890071608" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
@@ -90,6 +91,7 @@
 									<listOptionValue builtIn="false" value="&quot;../src/codec&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../src/test&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;../src/json&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;../src/exiforjson&quot;"/>
 								</option>
 								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.option.optimization.level.899621054" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" value="gnu.c.optimization.level.size" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.debugging.level.1251127335" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>

@@ -15,5 +15,6 @@ C_DEPS :=
 SUBDIRS := \
 src/test \
 src/json \
+src/exiforjson \
 src/codec \
 
