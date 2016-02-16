@@ -3,7 +3,7 @@ EXI for JSON in C programming language.
 
 ## Demo program
 
-Sample program to illustrate how to write and read JSON to EXIforJSON
+Sample program to illustrate how to write EXIforJSON and read JSON again
 
 ```c
 #include <stdio.h>
