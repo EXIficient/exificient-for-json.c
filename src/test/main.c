@@ -34,7 +34,7 @@
 #include "EXIforJSONEncoder.h"
 #include "EXIforJSONDecoder.h"
 
-#define BUFFER_SIZE 8192
+#define BUFFER_SIZE 2048
 
 /* ========== JSON SAMPLES */
 #define SAMPLE1 "{\"keyNumber\":   123, \"k\":-12.34, \"keyArrayStrings\": [ \"s1\", \"s2\" ] , \"valid\": true, \"foo\": null}"
