@@ -109,6 +109,63 @@ static int dumpKey(const char *js, jsmntok_t *t, size_t count, bitstream_t* stre
 	return 1;
 }
 
+
+static int updateStringValue(const char *s, uint16_t start, uint16_t end, exi_value_table_t* valueTable, uint16_t qnameID) {
+	int errn = 0;
+	uint16_t slen = end - start;
+	int i, k;
+	exi_value_string_table_entry_t* strHit = NULL;
+	uint32_t globalID;
+
+	if (valueTable->numberOfGlobalStrings > 0) {
+		for(i=0;i<valueTable->valueStringTable->len && strHit == NULL; i++) {
+			if(valueTable->valueStringTable->strs[i].str.len == slen) {
+				/* compare characters first by length */
+				int match = 1;
+				for(k=0; k<slen && match; k++) {
+					if(valueTable->valueStringTable->strs[i].str.characters[k] != s[start+k]) {
+						/* mis-match */
+						match = 0;
+					}
+				}
+				if(match) {
+					strHit = &valueTable->valueStringTable->strs[i];
+					globalID = i;
+				}
+			}
+		}
+	}
+
+	val.type = EXI_DATATYPE_STRING;
+	if(strHit == NULL) {
+		/* Miss */
+		val.str.type = EXI_STRING_VALUE_MISS;
+		val.str.miss.len = slen;
+		val.str.miss.size = val.str.miss.len;
+		val.str.miss.characters = (exi_string_character_t*)&s[start];
+	} else {
+		/* Hit */
+		if(qnameID == strHit->qnameID) {
+			/* local hit */
+			val.str.type = EXI_STRING_VALUE_LOCAL_HIT;
+			val.str.localID = strHit->localValueID;
+		} else {
+			/* global hit */
+			val.str.type = EXI_STRING_VALUE_GLOBAL_HIT;
+			val.str.globalID = globalID;
+		}
+		val.str.miss.len = slen;
+		val.str.miss.size = val.str.miss.len;
+		val.str.miss.characters = (exi_string_character_t*)&s[start];
+	}
+
+
+
+
+	return errn;
+}
+
+
 static int checkPendingKey(const char *js, json_values_t type, bitstream_t* stream, exi_state_t* state) {
 	int errn = 0;
 
@@ -132,13 +189,7 @@ static int checkPendingKey(const char *js, json_values_t type, bitstream_t* stre
 
 
 	if( pendingKeyStart > 0) {
-		/* TODO string table hit */
-		val.type = EXI_DATATYPE_STRING;
-		val.str.type = EXI_STRING_VALUE_MISS;
-		val.str.miss.len = pendingKeyEnd - pendingKeyStart;
-		val.str.miss.size = val.str.miss.len;
-		val.str.miss.characters = (exi_string_character_t*)&js[pendingKeyStart];
-
+		errn = updateStringValue(js, pendingKeyStart, pendingKeyEnd, &state->stringTable, EXI_EXIforJSON_0_key);
 		errn = exiEXIforJSONEncodeAttribute(stream, state, EXI_EXIforJSON_0_key, &val);
 
 		pendingKeyStart = 0; /* signals no pending key */
@@ -189,12 +240,8 @@ static int dump(const char *js, jsmntok_t *t, size_t count, bitstream_t* stream,
 	} else if (t->type == JSMN_STRING) {
 		checkPendingKey(js, STRING, stream, state);
 		DEBUG_PRINTF(("'%.*s'", t->end - t->start, js+t->start));
-		/* TODO string table hit */
-		val.type = EXI_DATATYPE_STRING;
-		val.str.type = EXI_STRING_VALUE_MISS;
-		val.str.miss.len = t->end - t->start;
-		val.str.miss.size = val.str.miss.len;
-		val.str.miss.characters = (exi_string_character_t*)&js[t->start];
+
+		errn = updateStringValue(js, t->start, t->end, &state->stringTable, EXI_EXIforJSON_4_string);
 		errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
 		errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(string) */
 		return 1;

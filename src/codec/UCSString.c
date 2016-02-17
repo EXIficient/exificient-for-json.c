@@ -53,16 +53,21 @@
 int toUCSString(char* chars, exi_string_t* s) {
 	int errn = 0;
 	unsigned int i;
+	int extraChar = 0;
+#if STRING_REPRESENTATION == STRING_REPRESENTATION_ASCII
+	extraChar = 1; /* null terminator */
+#endif /* STRING_REPRESENTATION_ASCII */
+
 	s->len = (uint16_t)strlen(chars);
 
-	if (s->len > s->size) {
+	if ((s->len + extraChar) > s->size) {
 #if MEMORY_ALLOCATION == STATIC_ALLOCATION
 		errn = EXI_ERROR_OUT_OF_STRING_BUFFER;
 #endif /* STATIC_ALLOCATION */
 #if MEMORY_ALLOCATION == DYNAMIC_ALLOCATION
 		errn = exiFreeDynamicStringMemory(s);
 		if(errn == 0) {
-			errn = exiAllocateDynamicStringMemory(s, s->len);
+			errn = exiAllocateDynamicStringMemory(s, (s->len + extraChar));
 		}
 
 #endif /* DYNAMIC_ALLOCATION */

@@ -383,7 +383,7 @@ int decodeStringOnly(bitstream_t* stream, uint16_t len, exi_string_t* s) {
 				return errn;
 			}
 		}
-		errn = exiAllocateDynamicStringMemory(s, len); /*s->len*/
+		errn = exiAllocateDynamicStringMemory(s, len + extraChar); /*s->len*/
 #endif /* DYNAMIC_ALLOCATION */
 	}
 	if(errn == 0) {
@@ -486,6 +486,11 @@ int decodeRCSStringValue(bitstream_t* stream, exi_value_table_t* stringTable, ui
 	unsigned int i;
 	uint32_t cp;
 	uint16_t L;
+	int extraChar = 0;
+#if STRING_REPRESENTATION == STRING_REPRESENTATION_ASCII
+	extraChar = 1; /* null terminator */
+#endif /* STRING_REPRESENTATION_ASCII */
+
 	int errn = decodeUnsignedInteger16(stream, &L);
 	if (errn == 0) {
 		switch (L) {
@@ -506,7 +511,7 @@ int decodeRCSStringValue(bitstream_t* stream, exi_value_table_t* stringTable, ui
 			s->type = EXI_STRING_VALUE_MISS;
 			s->miss.len = L = (uint16_t)(L - 2);
 
-			if (L > s->miss.size) {
+			if ((L + extraChar) > s->miss.size) {
 #if MEMORY_ALLOCATION == STATIC_ALLOCATION
 				errn = EXI_ERROR_OUT_OF_STRING_BUFFER;
 #endif /* STATIC_ALLOCATION */
@@ -515,7 +520,7 @@ int decodeRCSStringValue(bitstream_t* stream, exi_value_table_t* stringTable, ui
 					errn = exiFreeDynamicStringMemory(&(s->miss));
 				}
 				if(errn == 0) {
-					errn = exiAllocateDynamicStringMemory(&(s->miss), L);
+					errn = exiAllocateDynamicStringMemory(&(s->miss), (L + extraChar));
 				}
 #endif /* DYNAMIC_ALLOCATION */
 			}

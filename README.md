@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 		if( errn == 0 ) {
 			/* OK */
-			printf("Decoding EXIforJSON (len=%d) to JSON (len=%d) to was successful \n", posEncode, strlen(JSON_STRING_OUT));
+			printf("Decoding EXIforJSON (len=%d) to JSON (len=%d) was successful \n", posEncode, strlen(JSON_STRING_OUT));
 			printf("TO: \n%s \n", JSON_STRING_OUT);
 		} else {
 			/* ERROR */

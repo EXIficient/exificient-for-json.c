@@ -31,6 +31,9 @@
 #include "ErrorCodes.h"
 #include "ByteStream.h"
 
+#include "MethodsBag.h"
+#include "DecoderChannel.h"
+
 #include "DynamicMemory.h"
 #include "StringValueTable.h"
 
@@ -65,53 +68,35 @@ static char skey[MAX_KEY_LENGTH];
 static size_t skeylen = 0;
 
 
-static int writeString(char *json, size_t jlen, size_t* posJSON) {
+static int writeString(char *json, size_t jlen, size_t* posJSON, exi_value_table_t* valueTable, uint16_t qnameID) {
 	int errn = 0;
 	int i;
+	exi_string_t sv;
 
 	if(val.type == EXI_DATATYPE_STRING) {
 		json[(*posJSON)++] = '"';
 		switch(val.str.type) {
 		case EXI_STRING_VALUE_MISS:
-			if( (val.str.miss.len + *posJSON) < jlen  ) {
-				for (i = 0; i < val.str.miss.len; i++) {
-					sprintf(&json[*posJSON], "%c", (char) val.str.miss.characters[i]);
+			sv = val.str.miss;
+			break;
+		case EXI_STRING_VALUE_LOCAL_HIT:
+			errn = exiGetLocalStringValue(valueTable, qnameID, val.str.localID, &sv);
+			break;
+		case EXI_STRING_VALUE_GLOBAL_HIT:
+			errn = exiGetGlobalStringValue(valueTable, val.str.globalID, &sv);
+			break;
+		}
+		if(errn == 0) {
+			if( (sv.len + *posJSON) < jlen  ) {
+				for (i = 0; i < sv.len; i++) {
+					sprintf(&json[*posJSON], "%c", (char) sv.characters[i]);
 					(*posJSON)++;
 				}
 			} else {
 				errn = EXIforJSON_ERROR_OUT_OF_STRING;
 			}
-			break;
-		case EXI_STRING_VALUE_LOCAL_HIT:
-			/* TODO local string*/
-			errn = EXIforJSON_ERROR_NOT_SUPPORTED;
-
-			/*
-			if( exiGetLocalStringValue(valueTable, qnameID, (uint16_t)(val->str.localID), &sv)) {
-				printf("ERROR when retrieving localvalue hit \n");
-			} else {
-				for (i = 0; i < sv.len; i++) {
-					printf("%c", (char) sv.characters[i]);
-				}
-			}
-			*/
-			break;
-		case EXI_STRING_VALUE_GLOBAL_HIT:
-			/* TODO global string*/
-			errn = EXIforJSON_ERROR_NOT_SUPPORTED;
-
-			/*
-			if( exiGetGlobalStringValue(valueTable, (uint16_t)(val->str.globalID), &sv)) {
-				printf("ERROR when retrieving global value hit \n");
-			} else {
-				for (i = 0; i < sv.len; i++) {
-					printf("%c", (char) sv.characters[i]);
-				}
-			}
-			*/
-			break;
+			json[(*posJSON)++] = '"';
 		}
-		json[(*posJSON)++] = '"';
 	} else {
 		errn = EXIforJSON_ERROR_UNEXPECTED_STRING_TYPE;
 	}
@@ -119,7 +104,7 @@ static int writeString(char *json, size_t jlen, size_t* posJSON) {
 	return errn;
 }
 
-static int checkPendingEvent(char *json, size_t jlen, size_t* posJSON) {
+static int checkPendingEvent(char *json, size_t jlen, size_t* posJSON, exi_state_t* stateDecode) {
 	int errn = 0;
 
 
@@ -153,7 +138,7 @@ static int checkPendingEvent(char *json, size_t jlen, size_t* posJSON) {
 			}
 			break;
 		case VALUE_STRING:
-			errn = writeString(json, jlen, posJSON);
+			errn = writeString(json, jlen, posJSON, &stateDecode->stringTable, EXI_EXIforJSON_4_string);
 			if( (*posJSON + 1) < jlen) {
 				json[(*posJSON)++] = ',';
 			} else {
@@ -330,7 +315,7 @@ int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json
 			}
 			DEBUG_PRINTF((">> SE (%d) \n", qnameID));
 
-			checkPendingEvent(json, jlen, &posJSON);
+			checkPendingEvent(json, jlen, &posJSON, &stateDecode);
 			if(qnameID == EXI_EXIforJSON_4_map) {
 				/* wait for possible key */
 				jsonEvent = START_OBJECT;
@@ -364,7 +349,7 @@ int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json
 			}
 			DEBUG_PRINTF(("<< EE \n"));
 
-			checkPendingEvent(json, jlen, &posJSON);
+			checkPendingEvent(json, jlen, &posJSON, &stateDecode);
 			if(qnameID == EXI_EXIforJSON_4_map) {
 				/* writeEnd } */
 				if(json[posJSON-1] == ',') {
@@ -400,7 +385,7 @@ int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json
 			DEBUG_PRINTF((" CH: "));
 			/* debugValue(&val, &stringTableDecode, stateDecode.elementStack[stateDecode.stackIndex]); */
 
-			checkPendingEvent(json, jlen, &posJSON);
+			checkPendingEvent(json, jlen, &posJSON, &stateDecode);
 			break;
 		case EXI_EVENT_ATTRIBUTE:
 			errn = exiEXIforJSONDecodeAttribute(&iStream, &stateDecode,
@@ -418,7 +403,7 @@ int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json
 				return errn;
 			}
 
-			errn = writeString(skey, MAX_KEY_LENGTH, &skeylen);
+			errn = writeString(skey, MAX_KEY_LENGTH, &skeylen, &stateDecode.stringTable, EXI_EXIforJSON_0_key);
 
 			/* errn = getGlobalStringValueID(&stringTableDecode, &key); */
 			break;

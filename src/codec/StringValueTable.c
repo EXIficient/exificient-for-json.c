@@ -131,7 +131,7 @@ static int __exiAddStringValue(exi_value_table_t* valueTable,
 
 #if MEMORY_ALLOCATION == STATIC_ALLOCATION
 		/* make sure the str length fits into existing buffer */
-		if ( sv->len > valueTable->valueStringTable->strs[currLen].str.size ) {
+		if ( (sv->len + extraChar) > valueTable->valueStringTable->strs[currLen].str.size ) {
 			errn = EXI_ERROR_STRINGVALUES_OUT_OF_MEMORY;
 		}
 		/* set new length */
@@ -139,7 +139,7 @@ static int __exiAddStringValue(exi_value_table_t* valueTable,
 #endif/* STATIC_ALLOCATION */
 #if MEMORY_ALLOCATION == DYNAMIC_ALLOCATION
 		/* allocate codepoints memory */
-		errn = exiAllocateDynamicStringMemory(&valueTable->valueStringTable->strs[currLen].str, sv->len);
+		errn = exiAllocateDynamicStringMemory(&valueTable->valueStringTable->strs[currLen].str, (sv->len + extraChar) );
 		valueTable->valueStringTable->strs[currLen].str.len = sv->len;
 #endif /* DYNAMIC_ALLOCATION */
 
