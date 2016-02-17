@@ -31,6 +31,8 @@
 #include "StringNameTable.h"
 #include "EXIforJSONEXIEncoder.h"
 
+#include "StringValueTable.h"
+#include "DynamicMemory.h"
 
 #ifndef EXI_FOR_JSON_ENCODER_C
 #define EXI_FOR_JSON_ENCODER_C
@@ -285,8 +287,8 @@ static int dump(const char *js, jsmntok_t *t, size_t count, bitstream_t* stream,
 	return 0;
 }
 
-int encodeEXIforJSON(const char *json, size_t jlen, uint8_t* buffer, size_t blen, size_t* posEncode) {
-	int r;
+int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer, size_t blen, size_t* posEncode, const char ** sharedStrings, size_t stlen) {
+	int r, i;
 	int errn = 0;
 	jsmn_parser p;
 	jsmntok_t t[128]; /* We expect no more than 128 tokens */
@@ -298,11 +300,23 @@ int encodeEXIforJSON(const char *json, size_t jlen, uint8_t* buffer, size_t blen
 	exi_name_table_runtime_t runtimeTableEncode;
 	exi_state_t stateEncode;
 	exi_value_table_t stringTableEncode = { 0, EXI_EXIforJSONMAX_NUMBER_OF_QNAMES, numberOfLocalStringsEncode, NULL };
+
 	/** string values */
 	exi_value_string_table_t stringTableValuesEncode;
 	stringTableValuesEncode.size = 0;
 	stringTableValuesEncode.len = 0;
 	stringTableEncode.valueStringTable = &stringTableValuesEncode;
+
+	/* BINARY memory setup */
+	/* val.binary.len = 0;
+	val.binary.size = 0;
+	val.binary.data = NULL;*/
+
+	/* STRING miss memory setup */
+	/* val.str.type = EXI_STRING_VALUE_MISS;
+	val.str.miss.len = 0;
+	val.str.miss.size = 0;
+	val.str.miss.characters = NULL; */
 
 	/* setup output stream */
 	oStream.size = blen;
@@ -312,7 +326,16 @@ int encodeEXIforJSON(const char *json, size_t jlen, uint8_t* buffer, size_t blen
 	/* init encoder (write header, set initial state) */
 	errn = exiInitNameTableRuntime(&runtimeTableEncode);
 	if (errn==0) {
-		errn = exiEXIforJSONInitEncoder(&oStream, &stateEncode, runtimeTableEncode, stringTableEncode);
+		errn = exiEXIforJSONInitEncoder(&oStream, &stateEncode, &runtimeTableEncode, &stringTableEncode);
+
+		if(errn == 0 && stlen > 0 && sharedStrings != NULL) {
+			exi_string_t sv;
+			for(i=0; i<stlen; i++) {
+				sv.characters = (exi_string_character_t*)sharedStrings[i];
+				sv.len = sv.size = strlen(sharedStrings[i]);
+				errn = exiAddStringValue(&stateEncode.stringTable, &sv, EXI_EXIforJSON_2_nil);
+			}
+		}
 	}
 
 	jsmn_init(&p);
@@ -332,7 +355,20 @@ int encodeEXIforJSON(const char *json, size_t jlen, uint8_t* buffer, size_t blen
 		}
 	}
 
+	/* free memory if any */
+	/* exiFreeDynamicStringMemory(&val.str.miss);*/ /* val.str.miss points to passed JSON string */
+	/* exiFreeDynamicBinaryMemory(&val.binary);*/ /* binary not used */
+	for(i=(stlen-1); i<stringTableValuesEncode.len; i++) {
+		exiFreeDynamicStringMemory(&stringTableValuesEncode.strs[i].str);
+	}
+
+
 	return errn;
+}
+
+
+int encodeEXIforJSON(const char *json, size_t jlen, uint8_t* buffer, size_t blen, size_t* posEncode) {
+	return encodeEXIforJSONsharedStrings(json, jlen, buffer, blen, posEncode, NULL, 0);
 }
 
 

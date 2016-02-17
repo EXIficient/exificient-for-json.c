@@ -46,16 +46,32 @@ extern "C" {
 /**
  * \brief 		Decode EXIforJSON to JSON
  *
- * \param       buffer   	EXIforJSON buffer
- * \param       blen   		EXIforJSON buffer length
- * \param       posDecode   EXIforJSON start (and end after decoding)
- * \param       json   		JSON string
- * \param       jlen   		JSON string length
+ * \param       buffer   		EXIforJSON buffer
+ * \param       blen   			EXIforJSON buffer length
+ * \param       posDecode   	EXIforJSON start (and end after decoding)
+ * \param       json   			JSON string
+ * \param       jlen   			JSON string length
  *
  * \return                  	Error-Code <> 0
  *
  */
 int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json, size_t jlen);
+
+/**
+ * \brief 		Decode EXIforJSON to JSON with shared strings
+ *
+ * \param       buffer   		EXIforJSON buffer
+ * \param       blen   			EXIforJSON buffer length
+ * \param       posDecode   	EXIforJSON start (and end after decoding)
+ * \param       json   			JSON string
+ * \param       jlen   			JSON string length
+ * \param       sharedStrings   Shared EXI strings
+ * \param       stlen   		Shared EXI strings length
+ *
+ * \return                  	Error-Code <> 0
+ *
+ */
+int decodeEXIforJSONsharedStrings(uint8_t* buffer, size_t blen, size_t* posDecode, char *json, size_t jlen, const char ** sharedStrings, size_t stlen);
 
 
 #ifdef __cplusplus

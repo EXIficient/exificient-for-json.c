@@ -60,7 +60,7 @@ extern "C" {
  *
  */
 int exiEXIforJSONInitDecoder(bitstream_t* stream, exi_state_t* state,
-		exi_name_table_runtime_t runtimeTable, exi_value_table_t stringTable);
+		exi_name_table_runtime_t* runtimeTable, exi_value_table_t* stringTable);
 
 
 /**

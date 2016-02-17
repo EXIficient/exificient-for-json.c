@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "EXIforJSONDecoder.h"
 
@@ -218,8 +219,8 @@ static int checkPendingEvent(char *json, size_t jlen, size_t* posJSON, exi_state
 	return errn;
 }
 
-int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json, size_t jlen) {
-	int errn = 0;
+int decodeEXIforJSONsharedStrings(uint8_t* buffer, size_t blen, size_t* posDecode, char *json, size_t jlen, const char ** sharedStrings, size_t stlen) {
+	int errn = 0, i;
 	size_t posJSON = 0;
 	int noEndOfDocument;
 
@@ -240,9 +241,9 @@ int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json
 	stringTableDecode.valueStringTable = &stringTableValuesDecode;
 
 	/* BINARY memory setup */
-	val.binary.len = 0;
+	/*val.binary.len = 0;
 	val.binary.size = 0;
-	val.binary.data = NULL;
+	val.binary.data = NULL;*/
 
 	/* STRING miss memory setup */
 	val.str.type = EXI_STRING_VALUE_MISS;
@@ -261,7 +262,16 @@ int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json
 	/* init runtime table */
 	errn = exiInitNameTableRuntime(&runtimeTableDecode);
 	if (errn==0) {
-		errn = exiEXIforJSONInitDecoder(&iStream, &stateDecode, runtimeTableDecode, stringTableDecode);
+		errn = exiEXIforJSONInitDecoder(&iStream, &stateDecode, &runtimeTableDecode, &stringTableDecode);
+
+		if(errn == 0 && stlen > 0 && sharedStrings != NULL) {
+			exi_string_t sv;
+			for(i=0; i<stlen; i++) {
+				sv.characters = (exi_string_character_t*)sharedStrings[i];
+				sv.len = sv.size = strlen(sharedStrings[i]);
+				errn = exiAddStringValue(&stateDecode.stringTable, &sv, EXI_EXIforJSON_2_nil);
+			}
+		}
 	}
 	if (errn) {
 		DEBUG_PRINTF(("[Init-Decode-ERROR] %d \n", errn));
@@ -418,10 +428,16 @@ int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json
 
 	/* free memory if any */
 	exiFreeDynamicStringMemory(&val.str.miss);
-	exiFreeDynamicBinaryMemory(&val.binary);
-
+	/* exiFreeDynamicBinaryMemory(&val.binary);*/ /* binary not used */
+	for(i=(stlen-1); i<stringTableValuesDecode.len; i++) {
+		exiFreeDynamicStringMemory(&stringTableValuesDecode.strs[i].str);
+	}
 
 	return errn;
+}
+
+int decodeEXIforJSON(uint8_t* buffer, size_t blen, size_t* posDecode, char *json, size_t jlen) {
+	return decodeEXIforJSONsharedStrings(buffer, blen, posDecode, json, jlen, NULL, 0);
 }
 
 

@@ -386,7 +386,7 @@ int exiEXIforJSONDecodeListValue(bitstream_t* stream, exi_state_t* state, uint16
 
 
 int exiEXIforJSONInitDecoder(bitstream_t* stream, exi_state_t* state,
-		exi_name_table_runtime_t runtimeTable, exi_value_table_t stringTable) {
+		exi_name_table_runtime_t* runtimeTable, exi_value_table_t* stringTable) {
 #if EXI_OPTION_VALUE_PARTITION_CAPACITY != 0
 #if EXI_OPTION_VALUE_MAX_LENGTH != 0
 	int i;
@@ -397,11 +397,11 @@ int exiEXIforJSONInitDecoder(bitstream_t* stream, exi_state_t* state,
 	state->grammarStack[0] = DOCUMENT;
 	/* name table */
 	state->nameTablePrepopulated = exiEXIforJSONNameTablePrepopulated;
-	state->nameTableRuntime = runtimeTable;
+	state->nameTableRuntime = *runtimeTable;
 	/* next qname ID */
 	state->nextQNameID = EXI_EXIforJSONNUMBER_OF_PREPOPULATED_QNAMES;
 	/* string table */
-	state->stringTable = stringTable;
+	state->stringTable = *stringTable;
 	state->stringTable.numberOfGlobalStrings = 0;
 #if EXI_OPTION_VALUE_PARTITION_CAPACITY != 0
 #if EXI_OPTION_VALUE_MAX_LENGTH != 0
