@@ -305,6 +305,7 @@ int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer
 	exi_value_string_table_t stringTableValuesEncode;
 	stringTableValuesEncode.size = 0;
 	stringTableValuesEncode.len = 0;
+	stringTableValuesEncode.strs = 0;
 	stringTableEncode.valueStringTable = &stringTableValuesEncode;
 
 	/* BINARY memory setup */
