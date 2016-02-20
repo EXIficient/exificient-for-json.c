@@ -238,6 +238,7 @@ int decodeEXIforJSONsharedStrings(uint8_t* buffer, size_t blen, size_t* posDecod
 	exi_value_string_table_t stringTableValuesDecode;
 	stringTableValuesDecode.size = 0;
 	stringTableValuesDecode.len = 0;
+	stringTableValuesDecode.strs = 0;
 	stringTableDecode.valueStringTable = &stringTableValuesDecode;
 
 	/* BINARY memory setup */
