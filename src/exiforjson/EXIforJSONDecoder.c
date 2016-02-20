@@ -429,10 +429,11 @@ int decodeEXIforJSONsharedStrings(uint8_t* buffer, size_t blen, size_t* posDecod
 	/* free memory if any */
 	exiFreeDynamicStringMemory(&val.str.miss);
 	/* exiFreeDynamicBinaryMemory(&val.binary);*/ /* binary not used */
-	int lowerBound = (stlen == 0) ? 0 : stlen - 1;
-	for(i=lowerBound; i<stringTableValuesDecode.len; i++) {
+	for(i=stlen; i<stringTableValuesDecode.len; i++) {
 		exiFreeDynamicStringMemory(&stringTableValuesDecode.strs[i].str);
 	}
+	free(stringTableValuesDecode.strs);
+	stringTableValuesDecode.strs = 0;
 
 	return errn;
 }
