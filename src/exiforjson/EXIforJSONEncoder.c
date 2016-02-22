@@ -305,6 +305,7 @@ int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer
 	exi_value_string_table_t stringTableValuesEncode;
 	stringTableValuesEncode.size = 0;
 	stringTableValuesEncode.len = 0;
+	stringTableValuesEncode.strs = 0;
 	stringTableEncode.valueStringTable = &stringTableValuesEncode;
 
 	/* BINARY memory setup */
@@ -358,10 +359,11 @@ int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer
 	/* free memory if any */
 	/* exiFreeDynamicStringMemory(&val.str.miss);*/ /* val.str.miss points to passed JSON string */
 	/* exiFreeDynamicBinaryMemory(&val.binary);*/ /* binary not used */
-	int lowerBound = (stlen == 0) ? 0 : stlen - 1;
-	for(i=lowerBound; i<stringTableValuesEncode.len; i++) {
+	for(i=stlen; i<stringTableValuesEncode.len; i++) {
 		exiFreeDynamicStringMemory(&stringTableValuesEncode.strs[i].str);
 	}
+	free(stringTableValuesEncode.strs);
+	stringTableValuesEncode.strs = 0;
 
 
 	return errn;
