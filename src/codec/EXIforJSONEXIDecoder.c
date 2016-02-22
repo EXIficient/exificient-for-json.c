@@ -212,7 +212,7 @@ static int _exiDecodeNamespaceUri(bitstream_t* stream, exi_state_t* state,
 	uint16_t uriSize, uriCodingLength;
 	uint32_t uriID;
 
-	errn = exiGetUriSize(&state->nameTablePrepopulated, &state->nameTableRuntime, &uriSize);
+	errn = exiGetUriSize(state->nameTablePrepopulated, state->nameTableRuntime, &uriSize);
 	if (errn == 0) {
 		/* URI Entries + 1 */
 		errn = exiGetCodingLength((uint16_t)(uriSize + 1u), &uriCodingLength);
@@ -230,7 +230,7 @@ static int _exiDecodeNamespaceUri(bitstream_t* stream, exi_state_t* state,
 						return (errn);
 					}
 					/* after encoding string value is added to table */
-					errn = exiAddUri(&state->nameTablePrepopulated, &state->nameTableRuntime); /*, namespaceURI->chars); */
+					errn = exiAddUri(state->nameTablePrepopulated, state->nameTableRuntime); /*, namespaceURI->chars); */
 					if (errn) {
 						return (errn);
 					}
@@ -272,7 +272,7 @@ static int _exiDecodeLocalName(bitstream_t* stream, exi_state_t* state,
 			} else {
 				/* After encoding the string value, it is added to the string table */
 				/* partition and assigned the next available compact identifier */
-				errn = exiAddLocalName(&state->nameTablePrepopulated, &state->nameTableRuntime, uriID, &localName->id);
+				errn = exiAddLocalName(state->nameTablePrepopulated, state->nameTableRuntime, uriID, &localName->id);
 			}
 			
 		} else {
@@ -284,7 +284,7 @@ static int _exiDecodeLocalName(bitstream_t* stream, exi_state_t* state,
 			/* n is log2 m and m is the number of entries in the string table */
 			/* partition */
 			localName->type = EXI_NAME_ENTRY_TYPE_ID;
-			errn = exiGetLocalNameSize(&state->nameTablePrepopulated, &state->nameTableRuntime, uriID, &localNameSize); /* uriID, &localNameSize); */
+			errn = exiGetLocalNameSize(state->nameTablePrepopulated, state->nameTableRuntime, uriID, &localNameSize); /* uriID, &localNameSize); */
 			if (errn == 0) {
 				errn = exiGetCodingLength(localNameSize, &localNameCodingLength);
 				if (errn == 0) {
@@ -372,7 +372,7 @@ int exiEXIforJSONDecodeListValue(bitstream_t* stream, exi_state_t* state, uint16
 		errn = decodeDateTime(stream,lt.datetimeType, &val->datetime);
 		break;
 	case EXI_DATATYPE_STRING:
-		errn = decodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+		errn = decodeStringValue(stream, state->stringTable, qnameID, &val->str);
 		break;
 	default:
 		errn = EXI_UNSUPPORTED_LIST_VALUE_TYPE;
@@ -396,17 +396,17 @@ int exiEXIforJSONInitDecoder(bitstream_t* stream, exi_state_t* state,
 	state->stackIndex = 0;
 	state->grammarStack[0] = DOCUMENT;
 	/* name table */
-	state->nameTablePrepopulated = exiEXIforJSONNameTablePrepopulated;
-	state->nameTableRuntime = *runtimeTable;
+	state->nameTablePrepopulated = &exiEXIforJSONNameTablePrepopulated;
+	state->nameTableRuntime = runtimeTable;
 	/* next qname ID */
 	state->nextQNameID = EXI_EXIforJSONNUMBER_OF_PREPOPULATED_QNAMES;
 	/* string table */
-	state->stringTable = *stringTable;
-	state->stringTable.numberOfGlobalStrings = 0;
+	state->stringTable = stringTable;
+	state->stringTable->numberOfGlobalStrings = 0;
 #if EXI_OPTION_VALUE_PARTITION_CAPACITY != 0
 #if EXI_OPTION_VALUE_MAX_LENGTH != 0
-	for(i=0; i<(state->stringTable.sizeLocalStrings); i++) {
-		state->stringTable.numberOfLocalStrings[i] = 0;
+	for(i=0; i<(state->stringTable->sizeLocalStrings); i++) {
+		state->stringTable->numberOfLocalStrings[i] = 0;
 	}
 #endif /* EXI_OPTION_VALUE_MAX_LENGTH != 0 */
 #endif /* EXI_OPTION_VALUE_PARTITION_CAPACITY != 0 */
@@ -1541,7 +1541,7 @@ int exiEXIforJSONDecodeCharacters(bitstream_t* stream, exi_state_t* state,
 		case 47:
 			/* STRING */
 			val->type = EXI_DATATYPE_STRING;
-			errn = decodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+			errn = decodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			moveOnID = 47; /* move on ID */
 			break;
 		case 67:
@@ -1577,7 +1577,7 @@ int exiEXIforJSONDecodeCharacters(bitstream_t* stream, exi_state_t* state,
 		case 34:
 			/* STRING */
 			val->type = EXI_DATATYPE_STRING;
-			errn = decodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+			errn = decodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			moveOnID = 11; /* move on ID */
 			break;
 		case 63:
@@ -1657,7 +1657,7 @@ int exiEXIforJSONDecodeCharacters(bitstream_t* stream, exi_state_t* state,
 		case 52:
 			/* STRING */
 			val->type = EXI_DATATYPE_STRING;
-			errn = decodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+			errn = decodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			moveOnID = 52; /* move on ID */
 			break;
 		case 22:
@@ -1710,7 +1710,7 @@ int exiEXIforJSONDecodeCharacters(bitstream_t* stream, exi_state_t* state,
 			if (errn == 0) {
 				/* read content value as STRING */
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+				errn = decodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			}
 		}
 		break;
@@ -1737,13 +1737,13 @@ int exiEXIforJSONDecodeAttributeGenericValue(bitstream_t* stream, exi_state_t* s
 
 			default:
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				break;
 			}
 
 		} else {
 			val->type = EXI_DATATYPE_STRING;
-			errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+			errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 		}
 	}
 
@@ -1766,7 +1766,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 5; /* move on ID */
 				break;
 			}
@@ -1777,7 +1777,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 8; /* move on ID */
 				break;
 			}
@@ -1788,7 +1788,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 34; /* move on ID */
 				break;
 			}
@@ -1799,7 +1799,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 36; /* move on ID */
 				break;
 			}
@@ -1810,7 +1810,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 38; /* move on ID */
 				break;
 			}
@@ -1821,7 +1821,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 40; /* move on ID */
 				break;
 			}
@@ -1832,7 +1832,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 42; /* move on ID */
 				break;
 			}
@@ -1843,7 +1843,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 46; /* move on ID */
 				break;
 			}
@@ -1854,7 +1854,7 @@ int exiEXIforJSONDecodeAttribute(bitstream_t* stream, exi_state_t* state,
 			case 0:
 				*qnameID = 0;
 				val->type = EXI_DATATYPE_STRING;
-				errn = decodeStringValue(stream, &(state->stringTable), *qnameID, &val->str);
+				errn = decodeStringValue(stream, state->stringTable, *qnameID, &val->str);
 				moveOnID = 48; /* move on ID */
 				break;
 			}

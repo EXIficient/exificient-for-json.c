@@ -139,7 +139,7 @@ static int checkPendingEvent(char *json, size_t jlen, size_t* posJSON, exi_state
 			}
 			break;
 		case VALUE_STRING:
-			errn = writeString(json, jlen, posJSON, &stateDecode->stringTable, EXI_EXIforJSON_4_string);
+			errn = writeString(json, jlen, posJSON, stateDecode->stringTable, EXI_EXIforJSON_4_string);
 			if( (*posJSON + 1) < jlen) {
 				json[(*posJSON)++] = ',';
 			} else {
@@ -269,7 +269,7 @@ int decodeEXIforJSONsharedStrings(uint8_t* buffer, size_t blen, size_t* posDecod
 			for(i=0; i<stlen; i++) {
 				sv.characters = (exi_string_character_t*)sharedStrings[i];
 				sv.len = sv.size = strlen(sharedStrings[i]);
-				errn = exiAddStringValue(&stateDecode.stringTable, &sv, EXI_EXIforJSON_2_nil);
+				errn = exiAddStringValue(stateDecode.stringTable, &sv, EXI_EXIforJSON_2_nil);
 			}
 		}
 	}
@@ -413,7 +413,7 @@ int decodeEXIforJSONsharedStrings(uint8_t* buffer, size_t blen, size_t* posDecod
 				return errn;
 			}
 
-			errn = writeString(skey, MAX_KEY_LENGTH, &skeylen, &stateDecode.stringTable, EXI_EXIforJSON_0_key);
+			errn = writeString(skey, MAX_KEY_LENGTH, &skeylen, stateDecode.stringTable, EXI_EXIforJSON_0_key);
 
 			/* errn = getGlobalStringValueID(&stringTableDecode, &key); */
 			break;

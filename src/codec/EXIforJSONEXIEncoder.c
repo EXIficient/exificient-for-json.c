@@ -211,7 +211,7 @@ static int _exiEncodeNamespaceUriHit(bitstream_t* stream, exi_state_t* state, ui
 	uint16_t uriCodingLength;
 	uint16_t uriSize;
 
-	errn = exiGetUriSize(&state->nameTablePrepopulated, &state->nameTableRuntime, &uriSize);
+	errn = exiGetUriSize(state->nameTablePrepopulated, state->nameTableRuntime, &uriSize);
 	if (errn == 0) {
 		/* URI Entries + 1 */
 		errn = exiGetCodingLength( (uint16_t)(uriSize + 1), &uriCodingLength);
@@ -232,7 +232,7 @@ static int _exiEncodeNamespaceMiss(bitstream_t* stream, exi_state_t* state,
 	uint16_t uriCodingLength;
 	uint16_t uriSize;
 
-	errn = exiGetUriSize(&state->nameTablePrepopulated, &state->nameTableRuntime, &uriSize);
+	errn = exiGetUriSize(state->nameTablePrepopulated, state->nameTableRuntime, &uriSize);
 	if (errn == 0) {
 		/* URI Entries + 1 */
 		errn = exiGetCodingLength( (uint16_t)(uriSize + 1), &uriCodingLength);
@@ -246,7 +246,7 @@ static int _exiEncodeNamespaceMiss(bitstream_t* stream, exi_state_t* state,
 				errn = encodeString(stream, uri);
 				if (errn == 0) {
 					/* after encoding string value is added to table */
-					errn = exiAddUri(&state->nameTablePrepopulated, &state->nameTableRuntime); /*, namespaceURI->chars); */
+					errn = exiAddUri(state->nameTablePrepopulated, state->nameTableRuntime); /*, namespaceURI->chars); */
 					if (errn == 0) {
 						*uriID = uriSize;
 					}
@@ -273,7 +273,7 @@ static int _exiEncodeLocalNameHit(bitstream_t* stream, exi_state_t* state,
 		/* Unsigned Integer followed by an the compact identifier of the */
 		/* string value as an n-bit unsigned integer n is log2 m and m is */
 		/* the number of entries in the string table partition */
-		errn = exiGetLocalNameSize(&state->nameTablePrepopulated, &state->nameTableRuntime, uriID, &localNameSize);
+		errn = exiGetLocalNameSize(state->nameTablePrepopulated, state->nameTableRuntime, uriID, &localNameSize);
 		if (errn == 0) {
 			errn = exiGetCodingLength(localNameSize, &localNameCodingLength);
 			if (errn == 0) {
@@ -300,7 +300,7 @@ static int _exiEncodeLocalNameMiss(bitstream_t* stream, exi_state_t* state,
 		if(errn == 0) {
 			/* After encoding the string value, it is added to the string table */
 			/* partition and assigned the next available compact identifier */
-			errn = exiAddLocalName(&state->nameTablePrepopulated, &state->nameTableRuntime, uriID, localNameID);
+			errn = exiAddLocalName(state->nameTablePrepopulated, state->nameTableRuntime, uriID, localNameID);
 		}
 	}
 	
@@ -467,14 +467,14 @@ static int _encode2ndLevelAttribute(bitstream_t* stream, exi_state_t* state, uin
 								default:
 									errn = _exiValueToString(val);
 									if(errn == 0) {
-										errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+										errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 									}
 									break;
 								}
 							} else {
 								errn = _exiValueToString(val);
 								if(errn == 0) {
-									errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+									errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 								}
 							}
 						}
@@ -521,7 +521,7 @@ int exiEXIforJSONEncodeListValue(bitstream_t* stream, exi_state_t* state, uint16
 		errn = encodeDateTime(stream, &val->datetime);
 		break;
 	case EXI_DATATYPE_STRING:
-		errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+		errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 		break;
 	default:
 		errn = EXI_UNSUPPORTED_LIST_VALUE_TYPE;
@@ -592,17 +592,17 @@ int exiEXIforJSONInitEncoder(bitstream_t* stream, exi_state_t* state,
 	state->stackIndex = 0;
 	state->grammarStack[0] = DOCUMENT;
 	/* name tables */
-	state->nameTablePrepopulated = exiEXIforJSONNameTablePrepopulated;
-	state->nameTableRuntime = *runtimeTable;
+	state->nameTablePrepopulated = &exiEXIforJSONNameTablePrepopulated;
+	state->nameTableRuntime = runtimeTable;
 	/* next qname ID */
 	state->nextQNameID = EXI_EXIforJSONNUMBER_OF_PREPOPULATED_QNAMES;
 	/* string tables */
-	state->stringTable = *stringTable;
-	state->stringTable.numberOfGlobalStrings = 0;
+	state->stringTable = stringTable;
+	state->stringTable->numberOfGlobalStrings = 0;
 #if EXI_OPTION_VALUE_PARTITION_CAPACITY != 0
 #if EXI_OPTION_VALUE_MAX_LENGTH != 0
-	for(i=0; i<(state->stringTable.sizeLocalStrings); i++) {
-		state->stringTable.numberOfLocalStrings[i] = 0;
+	for(i=0; i<(state->stringTable->sizeLocalStrings); i++) {
+		state->stringTable->numberOfLocalStrings[i] = 0;
 	}
 #endif /* EXI_OPTION_VALUE_MAX_LENGTH != 0 */
 #endif /* EXI_OPTION_VALUE_PARTITION_CAPACITY != 0 */
@@ -1533,7 +1533,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 		if (val->type == EXI_DATATYPE_STRING) {
 			errn = encodeNBitUnsignedInteger(stream, 4, 15);
 			if(errn == 0) {
-				errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+				errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			}
 			moveOnID = 47;
 		}
@@ -1606,7 +1606,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 		if (val->type == EXI_DATATYPE_STRING) {
 			errn = encodeNBitUnsignedInteger(stream, 1, 1);
 			if(errn == 0) {
-				errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+				errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			}
 			moveOnID = 11;
 		}
@@ -1621,7 +1621,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 	case 13:
 		/* Element[CHARACTERS[STRING]] */
 		if (val->type == EXI_DATATYPE_STRING) {
-			errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+			errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			moveOnID = 11;
 		}
 		break;
@@ -1672,7 +1672,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 		if (val->type == EXI_DATATYPE_STRING) {
 			errn = encodeNBitUnsignedInteger(stream, 2, 2);
 			if(errn == 0) {
-				errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+				errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			}
 			moveOnID = 52;
 		}
@@ -1710,7 +1710,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 		if (val->type == EXI_DATATYPE_STRING) {
 			errn = encodeNBitUnsignedInteger(stream, 2, 3);
 			if(errn == 0) {
-				errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+				errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			}
 			moveOnID = 52;
 		}
@@ -1718,7 +1718,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 	case 34:
 		/* StartTag[CHARACTERS[STRING]] */
 		if (val->type == EXI_DATATYPE_STRING) {
-			errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+			errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			moveOnID = 11;
 		}
 		break;
@@ -1748,7 +1748,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 		if (val->type == EXI_DATATYPE_STRING) {
 			errn = encodeNBitUnsignedInteger(stream, 5, 17);
 			if(errn == 0) {
-				errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+				errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			}
 			moveOnID = 47;
 		}
@@ -1780,7 +1780,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 	case 10:
 		/* FirstStartTag[CHARACTERS[STRING]] */
 		if (val->type == EXI_DATATYPE_STRING) {
-			errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+			errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 			moveOnID = 11;
 		}
 		break;
@@ -1808,7 +1808,7 @@ int exiEXIforJSONEncodeCharacters(bitstream_t* stream, exi_state_t* state,
 			if (errn == 0) {
 				/* undeclared CH event code already written */
 				/* encode deviant value */
-				errn = encodeStringValue(stream, &(state->stringTable), state->elementStack[state->stackIndex], &val->str);
+				errn = encodeStringValue(stream, state->stringTable, state->elementStack[state->stackIndex], &val->str);
 				if (errn == 0) {
 					/* move to element content rule if not already */
 					errn = exi_EXIforJSON_MoveToElementContentRule(state);
@@ -1870,7 +1870,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 4, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1884,7 +1884,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 4, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1898,7 +1898,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 1, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1912,7 +1912,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 1, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1926,7 +1926,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 1, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1940,7 +1940,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 1, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1954,7 +1954,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 3, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1968,7 +1968,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 5, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -1982,7 +1982,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 			if (val->type == EXI_DATATYPE_STRING) {
 				errn = encodeNBitUnsignedInteger(stream, 2, 0);
 				if(errn == 0) {
-					errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+					errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 				}
 			}
 			break;
@@ -2013,7 +2013,7 @@ int exiEXIforJSONEncodeAttribute(bitstream_t* stream, exi_state_t* state, uint16
 							/* TODO global attribute datatype */
 							switch(val->type) {
 							case EXI_DATATYPE_STRING:
-								errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+								errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 								break;
 							case EXI_DATATYPE_INTEGER:
 								errn = encodeInteger(stream, &val->integer);
@@ -2075,7 +2075,7 @@ int exiEXIforJSONEncodeAttributeNS(bitstream_t* stream,
 					/* TODO xsi:type and xsi:boolean ?*/
 					errn = _exiValueToString(val);
 					if(errn == 0) {
-						errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+						errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 					}
 				}
 			}
@@ -2119,7 +2119,7 @@ int exiEXIforJSONEncodeAttributeGeneric(bitstream_t* stream,
 					/* TODO xsi:type and xsi:boolean ?*/
 					errn = _exiValueToString(val);
 					if(errn == 0) {
-						errn = encodeStringValue(stream, &(state->stringTable), qnameID, &val->str);
+						errn = encodeStringValue(stream, state->stringTable, qnameID, &val->str);
 					}
 				}
 			}
