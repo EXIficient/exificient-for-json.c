@@ -12,7 +12,6 @@ C_SRCS += \
 ../src/codec/BitOutputStream.c \
 ../src/codec/ByteDecoderChannel.c \
 ../src/codec/ByteEncoderChannel.c \
-../src/codec/ByteStream.c \
 ../src/codec/DynamicMemory.c \
 ../src/codec/EXIHeaderDecoder.c \
 ../src/codec/EXIHeaderEncoder.c \
@@ -23,8 +22,7 @@ C_SRCS += \
 ../src/codec/EXIforJSONQNames.c \
 ../src/codec/MethodsBag.c \
 ../src/codec/StringNameTable.c \
-../src/codec/StringValueTable.c \
-../src/codec/UCSString.c 
+../src/codec/StringValueTable.c 
 
 OBJS += \
 ./src/codec/AbstractDecoderChannel.o \
@@ -35,7 +33,6 @@ OBJS += \
 ./src/codec/BitOutputStream.o \
 ./src/codec/ByteDecoderChannel.o \
 ./src/codec/ByteEncoderChannel.o \
-./src/codec/ByteStream.o \
 ./src/codec/DynamicMemory.o \
 ./src/codec/EXIHeaderDecoder.o \
 ./src/codec/EXIHeaderEncoder.o \
@@ -46,8 +43,7 @@ OBJS += \
 ./src/codec/EXIforJSONQNames.o \
 ./src/codec/MethodsBag.o \
 ./src/codec/StringNameTable.o \
-./src/codec/StringValueTable.o \
-./src/codec/UCSString.o 
+./src/codec/StringValueTable.o 
 
 C_DEPS += \
 ./src/codec/AbstractDecoderChannel.d \
@@ -58,7 +54,6 @@ C_DEPS += \
 ./src/codec/BitOutputStream.d \
 ./src/codec/ByteDecoderChannel.d \
 ./src/codec/ByteEncoderChannel.d \
-./src/codec/ByteStream.d \
 ./src/codec/DynamicMemory.d \
 ./src/codec/EXIHeaderDecoder.d \
 ./src/codec/EXIHeaderEncoder.d \
@@ -69,8 +64,7 @@ C_DEPS += \
 ./src/codec/EXIforJSONQNames.d \
 ./src/codec/MethodsBag.d \
 ./src/codec/StringNameTable.d \
-./src/codec/StringValueTable.d \
-./src/codec/UCSString.d 
+./src/codec/StringValueTable.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

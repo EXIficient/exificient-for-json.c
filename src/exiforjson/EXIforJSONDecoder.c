@@ -30,7 +30,6 @@
 #include "StringNameTable.h"
 #include "EXIforJSONEXIDecoder.h"
 #include "ErrorCodes.h"
-#include "ByteStream.h"
 
 #include "MethodsBag.h"
 #include "DecoderChannel.h"
