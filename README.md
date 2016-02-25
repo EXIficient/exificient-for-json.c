@@ -1,6 +1,9 @@
 # exificient-for-json.c
 EXI for JSON in C programming language.
 
+[![Build Status](https://travis-ci.org/EXIficient/exificient-for-json.c.svg?branch=master)](https://travis-ci.org/EXIficient/exificient-for-json.c)
+
+
 ## Demo program
 
 Sample program to illustrate how to write EXIforJSON and read JSON again
