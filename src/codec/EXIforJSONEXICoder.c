@@ -49,6 +49,66 @@
 #endif /* DYNAMIC_ALLOCATION */
 
 
+/* ==================================== */
+/* Name Table Population */
+
+/* localName entries for URI '', id = 0 */
+/*
+  "key"
+ */
+
+/* localName entries for URI 'http://www.w3.org/XML/1998/namespace', id = 1 */
+/*
+  "base",  "id",  "lang",  "space"
+ */
+
+/* localName entries for URI 'http://www.w3.org/2001/XMLSchema-instance', id = 2 */
+/*
+  "nil",  "type"
+ */
+
+/* localName entries for URI 'http://www.w3.org/2001/XMLSchema', id = 3 */
+/*
+  "ENTITIES",  "ENTITY",  "ID",  "IDREF",  "IDREFS",
+  "NCName",  "NMTOKEN",  "NMTOKENS",  "NOTATION",  "Name",
+  "QName",  "anySimpleType",  "anyType",  "anyURI",  "base64Binary",
+  "boolean",  "byte",  "date",  "dateTime",  "decimal",
+  "double",  "duration",  "float",  "gDay",  "gMonth",
+  "gMonthDay",  "gYear",  "gYearMonth",  "hexBinary",  "int",
+  "integer",  "language",  "long",  "negativeInteger",  "nonNegativeInteger",
+  "nonPositiveInteger",  "normalizedString",  "positiveInteger",  "short",  "string",
+  "time",  "token",  "unsignedByte",  "unsignedInt",  "unsignedLong",
+  "unsignedShort"
+ */
+
+/* localName entries for URI 'http://www.w3.org/2015/EXI/json', id = 4 */
+/*
+  "array",  "arrayType",  "base64Binary",  "boolean",  "booleanType",
+  "date",  "dateTime",  "decimal",  "integer",  "map",
+  "mapType",  "null",  "nullType",  "number",  "numberType",
+  "other",  "otherType",  "string",  "stringType",  "time"
+
+ */
+
+
+/* number of local-name entries per URI */
+static uint16_t localNames[5] = {
+	/* '' */
+	1,
+	/* 'http://www.w3.org/XML/1998/namespace' */
+	4,
+	/* 'http://www.w3.org/2001/XMLSchema-instance' */
+	2,
+	/* 'http://www.w3.org/2001/XMLSchema' */
+	46,
+	/* 'http://www.w3.org/2015/EXI/json' */
+	20
+};
+
+
+exi_name_table_prepopulated_t exiEXIforJSONNameTablePrepopulated = { 5, localNames };
+
+
 int exi_EXIforJSON_PushStack(exi_state_t* state, int16_t newState, uint16_t qnameID) {
 	int errn = 0;
 	/* eqname_t* eqn*/

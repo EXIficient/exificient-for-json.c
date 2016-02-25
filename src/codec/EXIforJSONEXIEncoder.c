@@ -41,7 +41,6 @@
 #include "EncoderChannel.h"
 
 #include "StringNameTable.h"
-#include "EXIforJSONNameTableEntries.h"
 #include "MethodsBag.h"
 
 #include "EXIOptions.h"

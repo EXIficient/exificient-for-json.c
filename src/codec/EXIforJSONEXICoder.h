@@ -46,6 +46,13 @@ extern "C" {
 #define DOC_END 43
 
 
+
+/* ==================================== */
+/* Name Table Population */
+extern exi_name_table_prepopulated_t exiEXIforJSONNameTablePrepopulated;
+
+
+
 /* increments global and local string count */
 /* in case of dynamic memory string is collected */
 /*

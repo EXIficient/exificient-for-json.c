@@ -44,7 +44,6 @@
 #include "DecoderChannel.h"
 
 #include "StringNameTable.h"
-#include "EXIforJSONNameTableEntries.h"
 #include "MethodsBag.h"
 
 #include "EXIforJSONEXICoder.h"

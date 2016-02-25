@@ -13,7 +13,6 @@ C_SRCS += \
 ../src/codec/EXIforJSONEXICoder.c \
 ../src/codec/EXIforJSONEXIDecoder.c \
 ../src/codec/EXIforJSONEXIEncoder.c \
-../src/codec/EXIforJSONNameTableEntries.c \
 ../src/codec/EXIforJSONQNames.c \
 ../src/codec/EncoderChannel.c \
 ../src/codec/MethodsBag.c \
@@ -30,7 +29,6 @@ OBJS += \
 ./src/codec/EXIforJSONEXICoder.o \
 ./src/codec/EXIforJSONEXIDecoder.o \
 ./src/codec/EXIforJSONEXIEncoder.o \
-./src/codec/EXIforJSONNameTableEntries.o \
 ./src/codec/EXIforJSONQNames.o \
 ./src/codec/EncoderChannel.o \
 ./src/codec/MethodsBag.o \
@@ -47,7 +45,6 @@ C_DEPS += \
 ./src/codec/EXIforJSONEXICoder.d \
 ./src/codec/EXIforJSONEXIDecoder.d \
 ./src/codec/EXIforJSONEXIEncoder.d \
-./src/codec/EXIforJSONNameTableEntries.d \
 ./src/codec/EXIforJSONQNames.d \
 ./src/codec/EncoderChannel.d \
 ./src/codec/MethodsBag.d \
