@@ -664,11 +664,13 @@ int encode(bitstream_t* stream, uint8_t b) {
 #endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
 #if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
 	int errn = 0;
+#if EXI_STREAM == BYTE_ARRAY
 	if ( (*stream->pos) < stream->size ) {
 		stream->data[(*stream->pos)++] = b;
 	} else {
 		errn = EXI_ERROR_OUTPUT_STREAM_EOF;
 	}
+#endif /* EXI_STREAM == BYTE_ARRAY */
 #if EXI_STREAM == FILE_STREAM
 	if ( putc(b, stream->file) == EOF ) {
 		errn = EXI_ERROR_OUTPUT_STREAM_EOF;

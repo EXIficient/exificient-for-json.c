@@ -766,11 +766,13 @@ int decode(bitstream_t* stream, uint8_t* b) {
 #endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
 #if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
 	int errn = 0;
+#if EXI_STREAM == BYTE_ARRAY
 	if ( (*stream->pos) < stream->size ) {
 		*b = stream->data[(*stream->pos)++];
 	} else {
 		errn = EXI_ERROR_INPUT_STREAM_EOF;
 	}
+#endif /* EXI_STREAM == BYTE_ARRAY */
 #if EXI_STREAM == FILE_STREAM
 	*b = (uint8_t)(getc(stream->file));
 	/* EOF cannot be used, 0xFF valid value */
