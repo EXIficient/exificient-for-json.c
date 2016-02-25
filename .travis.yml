@@ -2,4 +2,5 @@ language: c
 compiler:
 - clang
 - gcc
-before_install: cd Release
+script:
+- "./build.sh all"
