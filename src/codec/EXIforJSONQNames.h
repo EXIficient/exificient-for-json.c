@@ -37,6 +37,97 @@
 
 #include "EXITypes.h"
 
+
+/** Number of pre-populated qnames */
+#define EXI_EXIforJSONNUMBER_OF_PREPOPULATED_QNAMES 73
+
+/** Number of runtime qnames */
+#define EXI_EXIforJSONMAX_NUMBER_OF_SUPPORTED_RUNTIMES_QNAMES 100
+
+/** Number of overall qnames (pre-populated from schema and runtime qnames) */
+#define EXI_EXIforJSONMAX_NUMBER_OF_QNAMES (EXI_EXIforJSONNUMBER_OF_PREPOPULATED_QNAMES + EXI_EXIforJSONMAX_NUMBER_OF_SUPPORTED_RUNTIMES_QNAMES)
+
+/** List of all qnames (and the associated qnameID) */
+/* URI={} with uriID=0*/
+#define EXI_EXIforJSON_0_key 0
+/* URI={http://www.w3.org/XML/1998/namespace} with uriID=1*/
+#define EXI_EXIforJSON_1_base 1
+#define EXI_EXIforJSON_1_id 2
+#define EXI_EXIforJSON_1_lang 3
+#define EXI_EXIforJSON_1_space 4
+/* URI={http://www.w3.org/2001/XMLSchema-instance} with uriID=2*/
+#define EXI_EXIforJSON_2_nil 5
+#define EXI_EXIforJSON_2_type 6
+/* URI={http://www.w3.org/2001/XMLSchema} with uriID=3*/
+#define EXI_EXIforJSON_3_ENTITIES 7
+#define EXI_EXIforJSON_3_ENTITY 8
+#define EXI_EXIforJSON_3_ID 9
+#define EXI_EXIforJSON_3_IDREF 10
+#define EXI_EXIforJSON_3_IDREFS 11
+#define EXI_EXIforJSON_3_NCName 12
+#define EXI_EXIforJSON_3_NMTOKEN 13
+#define EXI_EXIforJSON_3_NMTOKENS 14
+#define EXI_EXIforJSON_3_NOTATION 15
+#define EXI_EXIforJSON_3_Name 16
+#define EXI_EXIforJSON_3_QName 17
+#define EXI_EXIforJSON_3_anySimpleType 18
+#define EXI_EXIforJSON_3_anyType 19
+#define EXI_EXIforJSON_3_anyURI 20
+#define EXI_EXIforJSON_3_base64Binary 21
+#define EXI_EXIforJSON_3_boolean 22
+#define EXI_EXIforJSON_3_byte 23
+#define EXI_EXIforJSON_3_date 24
+#define EXI_EXIforJSON_3_dateTime 25
+#define EXI_EXIforJSON_3_decimal 26
+#define EXI_EXIforJSON_3_double 27
+#define EXI_EXIforJSON_3_duration 28
+#define EXI_EXIforJSON_3_float 29
+#define EXI_EXIforJSON_3_gDay 30
+#define EXI_EXIforJSON_3_gMonth 31
+#define EXI_EXIforJSON_3_gMonthDay 32
+#define EXI_EXIforJSON_3_gYear 33
+#define EXI_EXIforJSON_3_gYearMonth 34
+#define EXI_EXIforJSON_3_hexBinary 35
+#define EXI_EXIforJSON_3_int 36
+#define EXI_EXIforJSON_3_integer 37
+#define EXI_EXIforJSON_3_language 38
+#define EXI_EXIforJSON_3_long 39
+#define EXI_EXIforJSON_3_negativeInteger 40
+#define EXI_EXIforJSON_3_nonNegativeInteger 41
+#define EXI_EXIforJSON_3_nonPositiveInteger 42
+#define EXI_EXIforJSON_3_normalizedString 43
+#define EXI_EXIforJSON_3_positiveInteger 44
+#define EXI_EXIforJSON_3_short 45
+#define EXI_EXIforJSON_3_string 46
+#define EXI_EXIforJSON_3_time 47
+#define EXI_EXIforJSON_3_token 48
+#define EXI_EXIforJSON_3_unsignedByte 49
+#define EXI_EXIforJSON_3_unsignedInt 50
+#define EXI_EXIforJSON_3_unsignedLong 51
+#define EXI_EXIforJSON_3_unsignedShort 52
+/* URI={http://www.w3.org/2015/EXI/json} with uriID=4*/
+#define EXI_EXIforJSON_4_array 53
+#define EXI_EXIforJSON_4_arrayType 54
+#define EXI_EXIforJSON_4_base64Binary 55
+#define EXI_EXIforJSON_4_boolean 56
+#define EXI_EXIforJSON_4_booleanType 57
+#define EXI_EXIforJSON_4_date 58
+#define EXI_EXIforJSON_4_dateTime 59
+#define EXI_EXIforJSON_4_decimal 60
+#define EXI_EXIforJSON_4_integer 61
+#define EXI_EXIforJSON_4_map 62
+#define EXI_EXIforJSON_4_mapType 63
+#define EXI_EXIforJSON_4_null 64
+#define EXI_EXIforJSON_4_nullType 65
+#define EXI_EXIforJSON_4_number 66
+#define EXI_EXIforJSON_4_numberType 67
+#define EXI_EXIforJSON_4_other 68
+#define EXI_EXIforJSON_4_otherType 69
+#define EXI_EXIforJSON_4_string 70
+#define EXI_EXIforJSON_4_stringType 71
+#define EXI_EXIforJSON_4_time 72
+
+
 /**
  * \brief  	Returns efficient qname (namespaceURI & localName) IDs for qnameID
  *

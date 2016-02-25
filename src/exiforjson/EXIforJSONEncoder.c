@@ -27,7 +27,7 @@
 
 #include "jsmn.h"
 #include "EXITypes.h"
-#include "EXIforJSONQNameDefines.h"
+#include "EXIforJSONQNames.h"
 #include "StringNameTable.h"
 #include "EXIforJSONEXIEncoder.h"
 

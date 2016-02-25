@@ -26,7 +26,7 @@
 #include "EXIforJSONDecoder.h"
 
 #include "EXITypes.h"
-#include "EXIforJSONQNameDefines.h"
+#include "EXIforJSONQNames.h"
 #include "StringNameTable.h"
 #include "EXIforJSONEXIDecoder.h"
 #include "ErrorCodes.h"
