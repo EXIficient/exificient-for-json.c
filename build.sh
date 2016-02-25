@@ -1,2 +1,2 @@
 #!/bin/sh
-cd Release && make $*
+cd Release && make && ./exificient-for-json.exe 
