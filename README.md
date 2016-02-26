@@ -1,5 +1,9 @@
 # exificient-for-json.c
+
 EXI for JSON in C programming language.
+
+Note: source files in "src/exiforjson" and "src/json" are meant to show a mapping between textual JSON and EXIforJSON (and vice-versa).
+Constrained implementations are encouraged to use code in "src/codec" only by using the streaming API in a datatyped manner.
 
 [![Build Status](https://travis-ci.org/EXIficient/exificient-for-json.c.svg?branch=master)](https://travis-ci.org/EXIficient/exificient-for-json.c)
 
