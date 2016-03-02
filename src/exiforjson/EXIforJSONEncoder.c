@@ -202,7 +202,7 @@ static int dump_loop(const char *js, jsmntok_t *t_, bitstream_t* stream, exi_sta
 
 	while (1) {
 
-		// If we have an empty object or array at root we need special handling
+		/* If we have an empty object or array at root we need special handling */
 		if (stack->parent == 0 &&
 			stack->token->size == 0) {
 
@@ -221,7 +221,7 @@ static int dump_loop(const char *js, jsmntok_t *t_, bitstream_t* stream, exi_sta
 
 		for (; stack->loop_index < stack->token->size; stack->loop_index++, j++) {
 
-			// Root Object has no key
+			/* Root Object has no key */
 			if (stack->parent &&
 				stack->token->type == JSMN_OBJECT) {
 				j += dumpKey(js, &t_[j], stream, state);
@@ -295,20 +295,19 @@ static int dump_loop(const char *js, jsmntok_t *t_, bitstream_t* stream, exi_sta
 				if (errn == 0) {
 
 					jsmn_stack_t * descend = (jsmn_stack_t*)malloc(sizeof(jsmn_stack_t));
-					// TODO NULL check
+					/* TODO NULL check */
 					descend->parent = stack;
-					descend->loop_index = -1; // will be increased before use by the for-loop
+					descend->loop_index = -1; /* will be increased before use by the for-loop */
 					descend->token = t;
 
 					if (descend->token->type == JSMN_PRIMITIVE) {
 						descend->token->size = 1;
 					}
 
-					stack->loop_index++; // make sure to advance the parent element before descending
+					stack->loop_index++; /* make sure to advance the parent element before descendin*/
 					stack = descend;
 
-					// end element will be encoded later on when we leave the lower stack level
-					//errn = exiEXIforJSONEncodeEndElement(stream, state);  /* EE(map) */
+					/* end element will be encoded later on when we leave the lower stack level */
 					if (errn != 0) {
 						DEBUG_PRINTF(("EXI Error: end object\n"));
 					}
@@ -316,7 +315,6 @@ static int dump_loop(const char *js, jsmntok_t *t_, bitstream_t* stream, exi_sta
 				else {
 					DEBUG_PRINTF(("EXI Error: start object\n"));
 				}
-				//return j + 1;
 			} break;
 
 			case JSMN_ARRAY:
@@ -326,29 +324,29 @@ static int dump_loop(const char *js, jsmntok_t *t_, bitstream_t* stream, exi_sta
 				checkPendingKey(js, stream, state);
 
 				jsmn_stack_t * descend = (jsmn_stack_t*)malloc(sizeof(jsmn_stack_t));
-				// TODO NULL check
+				/* TODO NULL check */
 				descend->parent = stack;
-				descend->loop_index = -1; // will be increased before use by the for-loop
+				descend->loop_index = -1; /* will be increased before use by the for-loop */
 				descend->token = t;
 
 				if (descend->token->type == JSMN_PRIMITIVE) {
 					descend->token->size = 1;
 				}
 
-				stack->loop_index++; // make sure to advance the parent element before descending
+				stack->loop_index++; /* make sure to advance the parent element before descending */
 				stack = descend;
 
 				DEBUG_PRINTF(("[\n"));
 			} break;
 			}
-		} // for
+		} /* for */
 
-		  // if we did not complete this object / array do not delete, yet
+		/* if we did not complete this object / array do not delete, yet */
 		if (stack->loop_index < stack->token->size) {
 			continue;
 		}
 
-		// If we went down a level go up again and delete our helper struct from the heap
+		/* If we went down a level go up again and delete our helper struct from the heap */
 		if (stack->parent) {
 			switch (stack->token->type) {
 			case JSMN_ARRAY:
@@ -365,10 +363,10 @@ static int dump_loop(const char *js, jsmntok_t *t_, bitstream_t* stream, exi_sta
 			stack = temp;
 		}
 		else {
-			// We are back the root element and done
+			/* We are back the root element and done */
 			break;
 		}
-	} // while(1)
+	} /* while(1) */
 
 	return errn;
 }
