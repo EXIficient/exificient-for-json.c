@@ -422,7 +422,7 @@ int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer
 		}
 	}
 
-	const int jsmnTokens = 64;
+	const int jsmnTokens = 128;
 	jsmntok_t * t = (jsmntok_t*)malloc(jsmnTokens * sizeof(jsmntok_t));
 
 	jsmn_init(&p);
