@@ -50,8 +50,6 @@ static uint16_t numberOfLocalStringsEncode[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES];
 
 static exi_value_t val;
 
-typedef enum {MAP, ARRAY, STRING, NUMBER, TRUE, FALSE, NUL} json_values_t;
-
 static int dumpFloat(const char *js, int start, int end, bitstream_t* stream, exi_state_t* state) {
 	int errn;
 	/* minus */
@@ -98,7 +96,7 @@ static int dumpFloat(const char *js, int start, int end, bitstream_t* stream, ex
 static int pendingKeyStart;
 static int pendingKeyEnd;
 
-static int dumpKey(const char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_state_t* state) {
+static int dumpKey(const char *js, jsmntok_t *t, bitstream_t* stream, exi_state_t* state) {
 	if (t->type == JSMN_STRING) {
 		DEBUG_PRINTF(("#%.*s#", t->end - t->start, js+t->start));
 		pendingKeyStart = t->start;
@@ -168,27 +166,8 @@ static int updateStringValue(const char *s, uint16_t start, uint16_t end, exi_va
 }
 
 
-static int checkPendingKey(const char *js, json_values_t type, bitstream_t* stream, exi_state_t* state) {
+static int checkPendingKey(const char *js, bitstream_t* stream, exi_state_t* state) {
 	int errn = 0;
-
-	if(type == MAP) {
-		errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_map);
-	} else if(type == ARRAY) {
-		errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_array);
-	} else if(type == STRING) {
-		errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_string);
-	} else if(type == NUMBER) {
-		errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_number);
-	} else if(type == TRUE) {
-		errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_boolean);
-	} else if(type == FALSE) {
-		errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_boolean);
-	} else if(type == NUL) {
-		errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_null);
-	} else {
-		errn = -1;
-	}
-
 
 	if( pendingKeyStart > 0) {
 		errn = updateStringValue(js, pendingKeyStart, pendingKeyEnd, state->stringTable, EXI_EXIforJSON_0_key);
@@ -203,95 +182,199 @@ static int checkPendingKey(const char *js, json_values_t type, bitstream_t* stre
  * An example of reading JSON and printing its content
  */
 
-static int dump(const char *js, jsmntok_t *t, size_t count, bitstream_t* stream, exi_state_t* state) {
-	int i, j;
+static int dump_loop(const char *js, jsmntok_t *t_, bitstream_t* stream, exi_state_t* state) {
+
+	typedef struct jsmn_stack {
+		jsmntok_t * token;
+		int loop_index;
+		struct jsmn_stack * parent;
+	} jsmn_stack_t;
+
+	jsmn_stack_t root = { 0 };
+	root.parent = 0;
+	root.loop_index = 0;
+	root.token = &t_[0];
+
+	jsmn_stack_t * stack = &root;
+
 	int errn = 0;
-	if (count == 0) {
-		return errn;
-	}
-	if (t->type == JSMN_PRIMITIVE) {
-		/* number, true, false, or null */
-		if(js[t->start] == 't') {
-			checkPendingKey(js, TRUE, stream, state);
-			DEBUG_PRINTF(("booleanTrue \n"));
-			val.type = EXI_DATATYPE_BOOLEAN;
-			val.boolean = 1;
-			errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
-			errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(boolean) */
-		} else if(js[t->start] == 'f') {
-			checkPendingKey(js, FALSE, stream, state);
-			DEBUG_PRINTF(("booleanFalse \n"));
-			val.type = EXI_DATATYPE_BOOLEAN;
-			val.boolean = 0;
-			errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
-			errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(boolean) */
-		} else if(js[t->start] == 'n') {
-			checkPendingKey(js, NUL, stream, state);
-			DEBUG_PRINTF(("NULL \n"));
-			errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(null) */
-		} else {
-			checkPendingKey(js, NUMBER, stream, state);
-			/* printf("NUMBER %d %d \n", t->start, t->end); */
-			/* printf("%.*s", t->end - t->start, js+t->start); */
-			dumpFloat(js, t->start, t->end, stream, state);
-			errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(number) */
-		}
+	int j = 0;
 
-		/* printf("%.*s", t->end - t->start, js+t->start); */
-		return 1;
-	} else if (t->type == JSMN_STRING) {
-		checkPendingKey(js, STRING, stream, state);
-		DEBUG_PRINTF(("'%.*s'", t->end - t->start, js+t->start));
+	while (1) {
 
-		errn = updateStringValue(js, t->start, t->end, state->stringTable, EXI_EXIforJSON_4_string);
-		errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
-		errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(string) */
-		return 1;
-	} else if (t->type == JSMN_OBJECT) {
-		checkPendingKey(js, MAP, stream, state);
-		DEBUG_PRINTF(("{\n"));
+		/* If we have an empty object or array at root we need special handling */
+		if (stack->parent == 0 &&
+			stack->token->size == 0) {
 
+			switch (stack->token->type) {
+			case JSMN_ARRAY:
+				errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_array);
+				break;
 
-		if (errn == 0) {
-			j = 0;
-			for (i = 0; i < t->size; i++) {
-				j += dumpKey(js, t+1+j, count-j, stream, state);
-				DEBUG_PRINTF((": "));
-				j += dump(js, t+1+j, count-j, stream, state);
-				DEBUG_PRINTF(("\n"));
+			case JSMN_OBJECT:
+				errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_map);
+				break;
 			}
 
-			DEBUG_PRINTF(("}\n"));
-			errn = exiEXIforJSONEncodeEndElement(stream, state);  /* EE(map) */
-			if(errn != 0) {
-				DEBUG_PRINTF(("EXI Error: end object\n"));
-			}
-		} else {
-			DEBUG_PRINTF(("EXI Error: start object\n"));
+			errn = exiEXIforJSONEncodeEndElement(stream, state);  /* EE(???) */
 		}
-		return j+1;
-	} else if (t->type == JSMN_ARRAY) {
-		checkPendingKey(js, ARRAY, stream, state);
-		j = 0;
-		DEBUG_PRINTF(("[\n"));
-		for (i = 0; i < t->size; i++) {
-			DEBUG_PRINTF(("   - "));
-			j += dump(js, t+1+j, count-j, stream, state);
-			DEBUG_PRINTF(("\n"));
-		}
-		DEBUG_PRINTF(("]\n"));
-		errn = exiEXIforJSONEncodeEndElement(stream, state);  /* EE(array) */
 
-		return j+1;
-	}
-	return 0;
+		for (; stack->loop_index < stack->token->size; stack->loop_index++, j++) {
+
+			/* Root Object has no key */
+			if (stack->parent &&
+				stack->token->type == JSMN_OBJECT) {
+				j += dumpKey(js, &t_[j], stream, state);
+			}
+
+			jsmntok_t * t = &t_[j];
+
+			switch (t->type) {
+			case JSMN_PRIMITIVE:
+			{
+				/* number, true, false, or null */
+				if (js[t->start] == 't') {
+					errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_boolean);
+
+					checkPendingKey(js, stream, state);
+					DEBUG_PRINTF(("booleanTrue \n"));
+					val.type = EXI_DATATYPE_BOOLEAN;
+					val.boolean = 1;
+					errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
+					errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(boolean) */
+				}
+				else if (js[t->start] == 'f') {
+					errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_boolean);
+
+					checkPendingKey(js, stream, state);
+					DEBUG_PRINTF(("booleanFalse \n"));
+					val.type = EXI_DATATYPE_BOOLEAN;
+					val.boolean = 0;
+					errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
+					errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(boolean) */
+				}
+				else if (js[t->start] == 'n') {
+					errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_null);
+
+					checkPendingKey(js, stream, state);
+					DEBUG_PRINTF(("NULL \n"));
+					errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(null) */
+				}
+				else {
+					errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_number);
+
+					checkPendingKey(js, stream, state);
+					/* printf("NUMBER %d %d \n", t->start, t->end); */
+					/* printf("%.*s", t->end - t->start, js+t->start); */
+					dumpFloat(js, t->start, t->end, stream, state);
+					errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(number) */
+				}
+
+				/* printf("%.*s", t->end - t->start, js+t->start); */
+			} break;
+
+			case JSMN_STRING:
+			{
+				errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_string);
+
+				checkPendingKey(js, stream, state);
+				DEBUG_PRINTF(("'%.*s'", t->end - t->start, js + t->start));
+
+				errn = updateStringValue(js, t->start, t->end, state->stringTable, EXI_EXIforJSON_4_string);
+				errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
+				errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(string) */
+			} break;
+
+			case JSMN_OBJECT:
+			{
+				errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_map);
+
+				checkPendingKey(js, stream, state);
+				DEBUG_PRINTF(("{\n"));
+
+				if (errn == 0) {
+
+					jsmn_stack_t * descend = (jsmn_stack_t*)malloc(sizeof(jsmn_stack_t));
+					/* TODO NULL check */
+					descend->parent = stack;
+					descend->loop_index = -1; /* will be increased before use by the for-loop */
+					descend->token = t;
+
+					if (descend->token->type == JSMN_PRIMITIVE) {
+						descend->token->size = 1;
+					}
+
+					stack->loop_index++; /* make sure to advance the parent element before descendin*/
+					stack = descend;
+
+					/* end element will be encoded later on when we leave the lower stack level */
+					if (errn != 0) {
+						DEBUG_PRINTF(("EXI Error: end object\n"));
+					}
+				}
+				else {
+					DEBUG_PRINTF(("EXI Error: start object\n"));
+				}
+			} break;
+
+			case JSMN_ARRAY:
+			{
+				errn = exiEXIforJSONEncodeStartElement(stream, state, EXI_EXIforJSON_4_array);
+
+				checkPendingKey(js, stream, state);
+
+				jsmn_stack_t * descend = (jsmn_stack_t*)malloc(sizeof(jsmn_stack_t));
+				/* TODO NULL check */
+				descend->parent = stack;
+				descend->loop_index = -1; /* will be increased before use by the for-loop */
+				descend->token = t;
+
+				if (descend->token->type == JSMN_PRIMITIVE) {
+					descend->token->size = 1;
+				}
+
+				stack->loop_index++; /* make sure to advance the parent element before descending */
+				stack = descend;
+
+				DEBUG_PRINTF(("[\n"));
+			} break;
+			}
+		} /* for */
+
+		/* if we did not complete this object / array do not delete, yet */
+		if (stack->loop_index < stack->token->size) {
+			continue;
+		}
+
+		/* If we went down a level go up again and delete our helper struct from the heap */
+		if (stack->parent) {
+			switch (stack->token->type) {
+			case JSMN_ARRAY:
+			case JSMN_OBJECT:
+				errn = exiEXIforJSONEncodeEndElement(stream, state);  /* EE(???) */
+				DEBUG_PRINTF(("(]})\n"));
+				break;
+			}
+
+			jsmn_stack_t * temp = stack->parent;
+
+			free(stack);
+
+			stack = temp;
+		}
+		else {
+			/* We are back the root element and done */
+			break;
+		}
+	} /* while(1) */
+
+	return errn;
 }
 
 int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer, size_t blen, size_t* posEncode, const char ** sharedStrings, size_t stlen) {
 	int r, i;
 	int errn = 0;
 	jsmn_parser p;
-	jsmntok_t t[128]; /* We expect no more than 128 tokens */
 
 	pendingKeyStart = 0;
 
@@ -339,15 +422,19 @@ int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer
 		}
 	}
 
+	const int jsmnTokens = 128;
+	jsmntok_t * t = (jsmntok_t*)malloc(jsmnTokens * sizeof(jsmntok_t));
+
 	jsmn_init(&p);
-	r = jsmn_parse(&p, json, strlen(json), t, sizeof(t)/sizeof(t[0]));
+	r = jsmn_parse(&p, json, strlen(json), t, jsmnTokens);
+
 	if (r < 0) {
 		DEBUG_PRINTF(("Failed to parse JSON: %d\n", r));
 		errn = 1;
 	} else {
 		errn = exiEXIforJSONEncodeStartDocument(&oStream, &stateEncode);
 		if(errn == 0) {
-			dump(json, t, p.toknext, &oStream, &stateEncode);
+			dump_loop(json, t, &oStream, &stateEncode);
 			errn = exiEXIforJSONEncodeEndDocument(&oStream, &stateEncode);
 		}
 
@@ -356,15 +443,19 @@ int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer
 		}
 	}
 
+	free(t);
+	t = 0;
+
 	/* free memory if any */
 	/* exiFreeDynamicStringMemory(&val.str.miss);*/ /* val.str.miss points to passed JSON string */
 	/* exiFreeDynamicBinaryMemory(&val.binary);*/ /* binary not used */
 	for(i=stlen; i<stringTableValuesEncode.len; i++) {
 		exiFreeDynamicStringMemory(&stringTableValuesEncode.strs[i].str);
 	}
-	free(stringTableValuesEncode.strs);
-	stringTableValuesEncode.strs = 0;
-
+	if (stringTableValuesEncode.strs) {
+		free(stringTableValuesEncode.strs);
+		stringTableValuesEncode.strs = 0;
+	}
 
 	return errn;
 }
