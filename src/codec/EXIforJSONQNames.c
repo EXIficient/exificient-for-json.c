@@ -35,9 +35,10 @@
 #ifndef EXI_EXIforJSON_QNAMES_C
 #define EXI_EXIforJSON_QNAMES_C
 
+#include "EXIforJSONQNames.h"
+
 #include "EXITypes.h"
 #include "ErrorCodes.h"
-#include "EXIforJSONQNameDefines.h"
 
 /* qname is a composition of namespaceURI(ID) and localPart(ID) */
 static exi_eqname_t qnames[EXI_EXIforJSONMAX_NUMBER_OF_QNAMES] = {

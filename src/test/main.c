@@ -59,11 +59,8 @@ const int NUMBER_OF_SHARED_STRINGS = sizeof(SHARED_STRINGS)/sizeof(SHARED_STRING
 /* ==========  */
 
 
-int main(int argc, char *argv[]) {
+static int test(const char* JSON_STRING_IN, const int useSharedStrings) {
 	int errn = 0;
-	const int useSharedStrings = 0; /* make use of shared strings */
-
-	char *JSON_STRING_IN = SAMPLE3;
 
 	const size_t lenOut = strlen(JSON_STRING_IN) + 100; /* some extra space for decoding differences e.g, number 1 -> 1E0 etc */
 	char JSON_STRING_OUT[lenOut];
@@ -72,14 +69,13 @@ int main(int argc, char *argv[]) {
 	size_t posEncode = 0;
 	size_t posDecode = 0;
 
-	printf("FROM: \n%s \n", JSON_STRING_IN);
+	printf("FROM (%s): \n%s \n", useSharedStrings ? "withSharedStrings" : "withoutSharedStrings", JSON_STRING_IN);
 
 	if(useSharedStrings) {
 		errn = encodeEXIforJSONsharedStrings(JSON_STRING_IN, strlen(JSON_STRING_IN), buffer, BUFFER_SIZE, &posEncode, SHARED_STRINGS, NUMBER_OF_SHARED_STRINGS);
 	} else {
 		errn = encodeEXIforJSON(JSON_STRING_IN, strlen(JSON_STRING_IN), buffer, BUFFER_SIZE, &posEncode);
 	}
-
 	if( errn == 0 ) {
 		/* OK so far */
 		printf("Encoding JSON (len=%d) to EXIforJSON (len=%d) was successful \n", strlen(JSON_STRING_IN), posEncode);
@@ -94,7 +90,8 @@ int main(int argc, char *argv[]) {
 		if( errn == 0 ) {
 			/* OK */
 			printf("Decoding EXIforJSON (len=%d) to JSON (len=%d) was successful \n", posEncode, strlen(JSON_STRING_OUT));
-			printf("TO: \n%s \n", JSON_STRING_OUT);
+			printf("TO (%s): \n%s \n", useSharedStrings ? "withSharedStrings" : "withoutSharedStrings", JSON_STRING_OUT);
+			/* TODO JSON compare */
 		} else {
 			/* ERROR */
 			printf("Decoding EXIforJSON to JSON failed due to error %d \n", errn);
@@ -103,6 +100,67 @@ int main(int argc, char *argv[]) {
 		/* ERROR */
 		printf("Encoding JSON to EXIforJSON failed due to error %d \n", errn);
 	}
+
+	printf("- - - \n");
+
+	return errn;
+}
+
+int main(int argc, char *argv[]) {
+	int errn = 0;
+
+	char *JSON_STRING_IN;
+
+	/* test various JSON inputs with/without shared strings */
+
+	/* SAMPLE1 */
+	JSON_STRING_IN = SAMPLE1;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
+
+	/* SAMPLE2 */
+	JSON_STRING_IN = SAMPLE2;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
+
+	/* SAMPLE3 */
+	JSON_STRING_IN = SAMPLE3;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
+
+	/* SAMPLE4 */
+	JSON_STRING_IN = SAMPLE4;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
+
+	/* SAMPLE5 */
+	JSON_STRING_IN = SAMPLE5;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
+
+	/* SAMPLE6 */
+	JSON_STRING_IN = SAMPLE6;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
+
+	/* SAMPLE7 */
+	JSON_STRING_IN = SAMPLE7;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
 
 	return errn;
 }

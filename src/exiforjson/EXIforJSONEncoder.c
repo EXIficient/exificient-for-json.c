@@ -27,7 +27,7 @@
 
 #include "jsmn.h"
 #include "EXITypes.h"
-#include "EXIforJSONQNameDefines.h"
+#include "EXIforJSONQNames.h"
 #include "StringNameTable.h"
 #include "EXIforJSONEXIEncoder.h"
 
@@ -191,7 +191,7 @@ static int checkPendingKey(const char *js, json_values_t type, bitstream_t* stre
 
 
 	if( pendingKeyStart > 0) {
-		errn = updateStringValue(js, pendingKeyStart, pendingKeyEnd, &state->stringTable, EXI_EXIforJSON_0_key);
+		errn = updateStringValue(js, pendingKeyStart, pendingKeyEnd, state->stringTable, EXI_EXIforJSON_0_key);
 		errn = exiEXIforJSONEncodeAttribute(stream, state, EXI_EXIforJSON_0_key, &val);
 
 		pendingKeyStart = 0; /* signals no pending key */
@@ -243,7 +243,7 @@ static int dump(const char *js, jsmntok_t *t, size_t count, bitstream_t* stream,
 		checkPendingKey(js, STRING, stream, state);
 		DEBUG_PRINTF(("'%.*s'", t->end - t->start, js+t->start));
 
-		errn = updateStringValue(js, t->start, t->end, &state->stringTable, EXI_EXIforJSON_4_string);
+		errn = updateStringValue(js, t->start, t->end, state->stringTable, EXI_EXIforJSON_4_string);
 		errn = exiEXIforJSONEncodeCharacters(stream, state, &val);
 		errn = exiEXIforJSONEncodeEndElement(stream, state); /* EE(string) */
 		return 1;
@@ -334,7 +334,7 @@ int encodeEXIforJSONsharedStrings(const char *json, size_t jlen, uint8_t* buffer
 			for(i=0; i<stlen; i++) {
 				sv.characters = (exi_string_character_t*)sharedStrings[i];
 				sv.len = sv.size = strlen(sharedStrings[i]);
-				errn = exiAddStringValue(&stateEncode.stringTable, &sv, EXI_EXIforJSON_2_nil);
+				errn = exiAddStringValue(stateEncode.stringTable, &sv, EXI_EXIforJSON_2_nil);
 			}
 		}
 	}

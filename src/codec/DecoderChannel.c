@@ -48,8 +48,8 @@
 #include "DynamicMemory.h"
 #endif /* DYNAMIC_ALLOCATION */
 
-#ifndef ABSTRACT_DECODER_CHANNEL_C
-#define ABSTRACT_DECODER_CHANNEL_C
+#ifndef DECODER_CHANNEL_C
+#define DECODER_CHANNEL_C
 
 /* unsigned long == 64 bits, 10 * 7bits = 70 bits */
 #define MAX_OCTETS_FOR_UNSIGNED_INTEGER_64 10
@@ -747,6 +747,91 @@ int decodeDateTime(bitstream_t* stream, exi_datetime_type_t type, exi_datetime_t
 
 	return errn;
 }
+
+
+
+int decode(bitstream_t* stream, uint8_t* b) {
+#if EXI_OPTION_ALIGNMENT == BIT_PACKED
+	uint32_t bb;
+	int errn =  readBits(stream, 8, &bb);
+	if (errn == 0) {
+		if (bb > 256) {
+			errn = EXI_ERROR_UNEXPECTED_BYTE_VALUE;
+		} else {
+			*b = (uint8_t)bb;
+		}
+	}
+
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
+#if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
+	int errn = 0;
+#if EXI_STREAM == BYTE_ARRAY
+	if ( (*stream->pos) < stream->size ) {
+		*b = stream->data[(*stream->pos)++];
+	} else {
+		errn = EXI_ERROR_INPUT_STREAM_EOF;
+	}
+#endif /* EXI_STREAM == BYTE_ARRAY */
+#if EXI_STREAM == FILE_STREAM
+	*b = (uint8_t)(getc(stream->file));
+	/* EOF cannot be used, 0xFF valid value */
+	if ( feof(stream->file) || ferror(stream->file) ) {
+		errn = EXI_ERROR_INPUT_STREAM_EOF;
+	}
+#endif /* EXI_STREAM == FILE_STREAM */
+
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT */
+}
+
+int decodeBoolean(bitstream_t* stream, int* b) {
+#if EXI_OPTION_ALIGNMENT == BIT_PACKED
+	uint32_t ub;
+	int errn = readBits(stream, 1, &ub);
+	*b = (ub == 0) ? 0 : 1;
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
+#if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
+	uint8_t bb;
+	int errn = decode(stream, &bb);
+	*b = (bb == 0) ? 0 : 1;
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT */
+
+}
+
+/**
+ * Decodes and returns an n-bit unsigned integer using the minimum number of
+ * bytes required for n bits.
+ */
+int decodeNBitUnsignedInteger(bitstream_t* stream, uint16_t nbits, uint32_t* uint32) {
+#if EXI_OPTION_ALIGNMENT == BIT_PACKED
+	int errn = 0;
+	if (nbits == 0) {
+		*uint32 = 0;
+	} else {
+		errn= readBits(stream, nbits, uint32);
+	}
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
+#if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
+	uint16_t bitsRead = 0;
+	uint8_t b;
+	int errn = 0;
+	*uint32 = 0;
+
+	while (errn == 0 && bitsRead < nbits) {
+		errn = decode(stream, &b);
+		*uint32 = *uint32 + (uint32_t)(b << bitsRead);
+		bitsRead = (uint16_t)(bitsRead + 8);
+	}
+
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT */
+}
+
+
 
 #endif
 

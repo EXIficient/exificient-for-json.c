@@ -550,15 +550,15 @@ typedef struct {
 	uint32_t eventCode;
 
 	/** name table entries, pre-populated */
-	exi_name_table_prepopulated_t nameTablePrepopulated;
+	exi_name_table_prepopulated_t* nameTablePrepopulated;
 	/** name table entries, at runtime */
-	exi_name_table_runtime_t nameTableRuntime;
+	exi_name_table_runtime_t* nameTableRuntime;
 
 	/** next qname ID */
 	uint16_t nextQNameID;
 
 	/** string table entries */
-	exi_value_table_t stringTable;
+	exi_value_table_t* stringTable;
 
 	/** runtime built-in element grammars - numbers */
 	uint16_t numberOfRuntimeGrammars;

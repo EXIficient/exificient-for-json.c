@@ -42,8 +42,8 @@
 
 #include "StringValueTable.h"
 
-#ifndef ABSTRACT_ENCODER_CHANNEL_C
-#define ABSTRACT_ENCODER_CHANNEL_C
+#ifndef ENCODER_CHANNEL_C
+#define ENCODER_CHANNEL_C
 
 int encodeUnsignedInteger(bitstream_t* stream, exi_integer_t* iv) {
 	int errn = 0;
@@ -653,6 +653,118 @@ int encodeDateTime(bitstream_t* stream, exi_datetime_t* datetime) {
 
 	return errn;
 }
+
+
+
+
+
+int encode(bitstream_t* stream, uint8_t b) {
+#if EXI_OPTION_ALIGNMENT == BIT_PACKED
+	return writeBits(stream, 8, b);
+#endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
+#if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
+	int errn = 0;
+#if EXI_STREAM == BYTE_ARRAY
+	if ( (*stream->pos) < stream->size ) {
+		stream->data[(*stream->pos)++] = b;
+	} else {
+		errn = EXI_ERROR_OUTPUT_STREAM_EOF;
+	}
+#endif /* EXI_STREAM == BYTE_ARRAY */
+#if EXI_STREAM == FILE_STREAM
+	if ( putc(b, stream->file) == EOF ) {
+		errn = EXI_ERROR_OUTPUT_STREAM_EOF;
+	}
+#endif /* EXI_STREAM == FILE_STREAM */
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT */
+}
+
+/**
+ * Encode a single boolean value. A false value is encoded as bit 0 and true
+ * value is encode as bit 1.
+ */
+int encodeBoolean(bitstream_t* stream, int b) {
+#if EXI_OPTION_ALIGNMENT == BIT_PACKED
+	uint8_t val = b ? 1 : 0;
+	return writeBits(stream, 1, val);
+#endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
+#if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
+	uint8_t val = b ? 1 : 0;
+	return encode(stream, val);
+#endif /* EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT */
+}
+
+
+/**
+ * Encode n-bit unsigned integer. The n least significant bits of parameter
+ * b starting with the most significant, i.e. from left to right.
+ */
+int encodeNBitUnsignedInteger(bitstream_t* stream, uint16_t nbits, uint32_t val)  {
+#if EXI_OPTION_ALIGNMENT == BIT_PACKED
+	int errn = 0;
+	if (nbits > 0) {
+		errn = writeBits(stream, nbits, val);
+	}
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
+#if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
+	int errn = 0;
+	if (nbits > 0) {
+		if (nbits < 9) {
+			/* 1 byte */
+			errn = encode(stream, val & 0xff);
+		} else if (nbits < 17) {
+			/* 2 bytes */
+			errn = encode(stream, val & 0x00ff);
+			if(errn == 0) {
+				errn = encode(stream, (uint8_t)((val & 0xff00) >> 8));
+			}
+		} else if (nbits < 25) {
+			/* 3 bytes */
+			errn = encode(stream, val & 0x0000ff);
+			if(errn == 0) {
+				errn = encode(stream, (uint8_t)((val & 0x00ff00) >> 8));
+				if(errn == 0) {
+					errn = encode(stream, (uint8_t)((val & 0xff0000) >> 16));
+				}
+			}
+		} else if (nbits < 33) {
+			/* 4 bytes */
+			errn = encode(stream, val & 0x000000ff);
+			if(errn == 0) {
+				errn = encode(stream, (uint8_t)((val & 0x0000ff00) >> 8));
+				if(errn == 0) {
+					errn = encode(stream, (uint8_t)((val & 0x00ff0000) >> 16));
+					if(errn == 0) {
+						errn = encode(stream, (uint8_t)((val & 0xff000000) >> 24));
+					}
+				}
+			}
+		} else {
+			/* TODO Currently not more than 4 Bytes allowed for NBitUnsignedInteger */
+			errn = EXI_UNSUPPORTED_NBIT_INTEGER_LENGTH;
+		}
+	}
+	return errn;
+#endif /* EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT */
+}
+
+/**
+ * Flush underlying output stream.
+ */
+int encodeFinish(bitstream_t* stream) {
+#if EXI_OPTION_ALIGNMENT == BIT_PACKED
+#endif /* EXI_OPTION_ALIGNMENT == BIT_PACKED */
+	return flush(stream);
+#if EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT
+	/* no pending bits in byte-aligned mode */
+	return 0;
+#endif /* EXI_OPTION_ALIGNMENT == BYTE_ALIGNMENT */
+}
+
+
+
 
 #endif
 
