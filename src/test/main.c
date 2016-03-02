@@ -33,6 +33,7 @@
 
 #include "EXIforJSONEncoder.h"
 #include "EXIforJSONDecoder.h"
+#include "jsmn.h"
 
 #define BUFFER_SIZE 2048
 
@@ -91,6 +92,19 @@ static int test(const char* JSON_STRING_IN, const int useSharedStrings) {
 			/* OK */
 			printf("Decoding EXIforJSON (len=%d) to JSON (len=%d) was successful \n", posEncode, strlen(JSON_STRING_OUT));
 			printf("TO (%s): \n%s \n", useSharedStrings ? "withSharedStrings" : "withoutSharedStrings", JSON_STRING_OUT);
+
+			/* parse JSON again to check syntax */
+			const int jsmnTokens = 128;
+			jsmntok_t * t = (jsmntok_t*) malloc(jsmnTokens * sizeof(jsmntok_t));
+
+			jsmn_parser p;
+			jsmn_init(&p);
+			int cnt  = jsmn_parse(&p, JSON_STRING_OUT, strlen(JSON_STRING_OUT), t, jsmnTokens);
+			if(cnt < 0) {
+				/* error */
+				errn = cnt;
+				printf("\tParsing JSON failed! \n");
+			}
 			/* TODO JSON compare */
 		} else {
 			/* ERROR */
