@@ -68,6 +68,26 @@ static char skey[MAX_KEY_LENGTH];
 static size_t skeylen = 0;
 
 
+static size_t getInt64Length(int64_t number) {
+	int i;
+	int count = 1;  /* count starts at one because its the minimum amount of digits possible */
+	if (number < 0) {
+		number *= (-1);
+		count++; /* minus sign */
+	}
+
+    /*
+     * this loop will loop until the number "i" is bigger then "number"
+     * if "i" is less then "number" multiply "i" by 10 and increase count
+     * when the loop ends the number of count is the length of "number".
+     */
+	for(i = 10; i <= number; i*=10) {
+	     count++;
+	}
+	return count;
+}
+
+
 static int writeString(char *json, size_t jlen, size_t* posJSON, exi_value_table_t* valueTable, uint16_t qnameID) {
 	int errn = 0;
 	int i;
@@ -149,16 +169,27 @@ static int checkPendingEvent(char *json, size_t jlen, size_t* posJSON, exi_state
 			if(val.type == EXI_DATATYPE_FLOAT) {
 				size_t remN = (jlen-*posJSON);
 				
-				char temp[64] = { 0 };
+				size_t lm = getInt64Length(val.float_me.mantissa);
+				size_t ll;
+
 				if(val.float_me.exponent == 0) {
-					sprintf(temp,  "%ld", (long int) val.float_me.mantissa);
+					ll = lm;
+					if( (*posJSON + ll) < jlen) {
+						sprintf(&json[*posJSON], "%ld", (long int) val.float_me.mantissa);
+					} else {
+						errn = EXIforJSON_ERROR_OUT_OF_STRING;
+					}
 				} else {
-					sprintf(temp,  "%ldE%d", (long int) val.float_me.mantissa, val.float_me.exponent);
+					size_t le = getInt64Length(val.float_me.exponent);
+					ll = lm + 1 + le; /* E */
+					if( (*posJSON + ll) < jlen) {
+						sprintf(&json[*posJSON], "%ldE%d", (long int) val.float_me.mantissa, val.float_me.exponent);
+					} else {
+						errn = EXIforJSON_ERROR_OUT_OF_STRING;
+					}
 				}
 
-				int ll = strlen(temp);
-				if(ll >= 0 && ll < remN ) {
-					memcpy(&json[*posJSON], temp, ll);
+				if(errn ==0 && ll >= 0 && ll < remN ) {
 					(*posJSON) +=ll;
 					if( (*posJSON + 1) < jlen) {
 						json[(*posJSON)++] = ',';

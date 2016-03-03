@@ -38,6 +38,8 @@
 #define BUFFER_SIZE 2048
 
 /* ========== JSON SAMPLES */
+#define SAMPLE0 "{\"float1\": 1e500, \"float2\": -12.34}"
+/* */
 #define SAMPLE1 "{\"keyNumber\":   123, \"k\":-12.34, \"keyArrayStrings\": [ \"s1\", \"s2\" ] , \"valid\": true, \"foo\": null}"
 /* test01.json */
 #define SAMPLE2 "{\"keyNumber\":123,\"keyArrayStrings\":[\"s1\",\"s2\"]}"
@@ -126,6 +128,13 @@ int main(int argc, char *argv[]) {
 	char *JSON_STRING_IN;
 
 	/* test various JSON inputs with/without shared strings */
+
+	/* SAMPLE0 */
+	JSON_STRING_IN = SAMPLE0;
+	errn = test(JSON_STRING_IN, 0);
+	if (errn) return errn;
+	errn = test(JSON_STRING_IN, 1);
+	if (errn) return errn;
 
 	/* SAMPLE1 */
 	JSON_STRING_IN = SAMPLE1;
