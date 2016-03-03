@@ -58,26 +58,43 @@ static int dumpFloat(const char *js, int start, int end, bitstream_t* stream,
 	/* E/e */
 	int pos = start;
 	int negative = 0;
+	int negativeE = 0;
 	int mantissa = 0;
 	int exponent = 0;
+	int exponentE = 0;
 	int afterDot = 0;
+	int afterE = 0;
 
 	while (pos < end) {
 		if (js[pos] == '-') {
-			negative = 1;
+			if(afterE) {
+				negativeE = 1;
+			} else {
+				negative = 1;
+			}
 		} else if (js[pos] == '+') {
 			/* */
 		} else if (js[pos] == '.') {
 			afterDot = 1;
+		} else if (js[pos] == 'E' || js[pos] == 'e') {
+			afterE = 1;
 		} else if ((js[pos] >= '0') && (js[pos] <= '9')) {
-			mantissa = (mantissa * 10) + ((js[pos]) - '0');
-			if (afterDot) {
+			if(afterE) {
+				exponentE = (exponentE * 10) + ((js[pos]) - '0');
+			} else {
+				mantissa = (mantissa * 10) + ((js[pos]) - '0');
+			}
+			if (afterDot && !afterE) {
 				exponent -= 1;
 			}
 		}
 		pos++;
 	}
 
+	if (negativeE) {
+		exponentE = exponentE * -1;
+	}
+	exponent = exponent + exponentE;
 	if (negative) {
 		mantissa = mantissa * -1;
 	}

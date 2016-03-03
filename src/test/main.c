@@ -38,7 +38,7 @@
 #define BUFFER_SIZE 2048
 
 /* ========== JSON SAMPLES */
-#define SAMPLE0 "{\"float1\": 1e500, \"float2\": -12.34}"
+#define SAMPLE0 "{\"float1\": 1.1e500, \"float2\": -12.34, \"float1\": -23.45E-7}"
 /* */
 #define SAMPLE1 "{\"keyNumber\":   123, \"k\":-12.34, \"keyArrayStrings\": [ \"s1\", \"s2\" ] , \"valid\": true, \"foo\": null}"
 /* test01.json */
