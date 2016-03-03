@@ -148,13 +148,17 @@ static int checkPendingEvent(char *json, size_t jlen, size_t* posJSON, exi_state
 		case VALUE_NUMBER:
 			if(val.type == EXI_DATATYPE_FLOAT) {
 				size_t remN = (jlen-*posJSON);
-				int ll;
+				
+				char temp[64] = { 0 };
 				if(val.float_me.exponent == 0) {
-					ll = snprintf(&json[*posJSON], remN,  "%ld", (long int) val.float_me.mantissa);
+					sprintf(temp,  "%ld", (long int) val.float_me.mantissa);
 				} else {
-					ll = snprintf(&json[*posJSON], remN,  "%ldE%d", (long int) val.float_me.mantissa, val.float_me.exponent);
+					sprintf(temp,  "%ldE%d", (long int) val.float_me.mantissa, val.float_me.exponent);
 				}
+
+				int ll = strlen(temp);
 				if(ll >= 0 && ll < remN ) {
+					memcpy(&json[*posJSON], temp, ll);
 					(*posJSON) +=ll;
 					if( (*posJSON + 1) < jlen) {
 						json[(*posJSON)++] = ',';
